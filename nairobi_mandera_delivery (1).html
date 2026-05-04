@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>NMD Deliveries</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f1ed;--surface:#fff;--s2:#f0efe9;--border:#e2e0d8;--b2:#d0cfc6;
+  --text:#1a1917;--t2:#6b6a64;--t3:#9a9890;
+  --accent:#1a3a2a;--al:#e8f0eb;
+  --green:#2d6a4f;--gbg:#d8f3dc;
+  --blue:#1a4b7a;--bbg:#dbeafe;
+  --amber:#7c4d00;--abg:#fef3c7;
+  --purple:#4c1d95;--pbg:#ede9fe;
+  --coral:#7c2d12;--cbg:#fee2e2;
+  --teal:#0f4c5c;--tbg:#ccfbf1;
+  --red:#991b1b;--rbg:#fee2e2;
+  --orange:#9a3412;--obg:#ffedd5;
+  --indigo:#312e81;--ibg:#e0e7ff;
+  --r:12px;--rs:8px;
+  --tab-h:62px;--hdr-h:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;background:linear-gradient(160deg,#0d1f15 0%,#1a3a2a 100%);padding:16px}
+.lbox{background:var(--surface);border-radius:20px;padding:32px 24px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.llogo{text-align:center;margin-bottom:28px}
+.llogo-icon{font-size:42px;margin-bottom:10px}
+.llogo h1{font-size:22px;font-weight:700;color:var(--accent)}
+.llogo p{font-size:13px;color:var(--t3);margin-top:3px}
+.lf{margin-bottom:16px}
+.lf label{display:block;font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+.lf input{width:100%;padding:14px 16px;font-size:16px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--b2);border-radius:var(--rs);background:var(--surface);color:var(--text);-webkit-appearance:none}
+.lf input:focus{outline:none;border-color:var(--accent)}
+.lbtn{width:100%;padding:15px;background:var(--accent);color:white;border:none;border-radius:var(--rs);font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;font-family:'DM Sans',sans-serif}
+.lerr{color:var(--red);font-size:13px;text-align:center;margin-top:10px;display:none}
+.ldemo{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.ldemo strong{display:block;margin-bottom:8px;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.6px}
+.drow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.drow:last-child{border-bottom:none}
+.drow-creds strong{font-size:13px;color:var(--text)}
+.drow-creds span{display:block;color:var(--t3);font-size:11px;margin-top:1px}
+.rchip{display:inline-flex;align-items:center;gap:3px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.r-staff{background:#FEF9C3;color:#713F12}.r-supervisor{background:#DBEAFE;color:#1E40AF}.r-admin{background:#FCE7F3;color:#9D174D}
+
+/* HEADER */
+.hdr{background:var(--accent);color:white;height:var(--hdr-h);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:50}
+.hbrand{display:flex;align-items:center;gap:10px}
+.htitle{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.hsub{font-size:10px;opacity:.6;margin-top:1px}
+.hright{display:flex;align-items:center;gap:8px}
+.uchip{display:flex;align-items:center;gap:6px}
+.uav{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.uname{font-size:12px;font-weight:600}
+.urole{font-size:10px;opacity:.65;text-transform:capitalize}
+.logout-btn{font-size:12px;padding:6px 10px;border:1px solid rgba(255,255,255,.35);border-radius:6px;cursor:pointer;background:transparent;color:white;font-family:'DM Sans',sans-serif;font-weight:500}
+
+/* LAYOUT */
+#main-app{display:none;height:100vh;height:100dvh;flex-direction:column}
+.body-scroll{position:fixed;top:var(--hdr-h);left:0;right:0;bottom:var(--tab-h);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg)}
+.main{padding:16px;max-width:720px;margin:0 auto;padding-bottom:28px}
+
+/* BOTTOM TAB BAR */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:var(--tab-h);background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.tbi{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:8px 4px;border:none;background:transparent;color:var(--t3);font-family:'DM Sans',sans-serif;transition:color .15s;position:relative}
+.tbi.active{color:var(--accent)}
+.tbi.locked{color:var(--b2)}
+.tbi-icon{font-size:19px;line-height:1}
+.tbi-label{font-size:10px;font-weight:600;letter-spacing:.2px}
+.tbi.active::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2.5px;background:var(--accent);border-radius:0 0 3px 3px}
+
+/* TABS */
+.tab{display:none}.tab.active{display:block}
+
+/* ROLE BANNER */
+.rbanner{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:var(--rs);margin-bottom:16px;font-size:13px;line-height:1.5}
+.rbanner.staff{background:#FEF9C3;border:1px solid #FDE047;color:#713F12}
+.rbanner.supervisor{background:#DBEAFE;border:1px solid #93C5FD;color:#1E40AF}
+.rbanner.admin{background:#FCE7F3;border:1px solid #F9A8D4;color:#9D174D}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.ct{font-size:12px;font-weight:700;color:var(--t2);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.6px}
+.pg-title{font-size:17px;font-weight:700;margin-bottom:14px}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.metric{background:var(--s2);border-radius:var(--rs);padding:14px;border:1px solid var(--border)}
+.metric .ml{font-size:10px;color:var(--t3);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.metric .mv{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.metric .ms{font-size:11px;color:var(--t3);margin-top:3px}
+.metric.green{background:var(--gbg);border-color:#b7e4c7}.metric.green .mv{color:var(--green)}
+.metric.blue{background:var(--bbg);border-color:#bfdbfe}.metric.blue .mv{color:var(--blue)}
+.metric.orange{background:var(--obg);border-color:#fed7aa}.metric.orange .mv{color:var(--orange)}
+.metric.indigo{background:var(--ibg);border-color:#c7d2fe}.metric.indigo .mv{color:var(--indigo)}
+
+/* FORM */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select,.field textarea{width:100%;padding:13px 14px;font-size:16px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--b2);border-radius:var(--rs);background:var(--surface);color:var(--text);-webkit-appearance:none;appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239a9890' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,58,42,.1)}
+.field input:disabled{background:var(--s2);color:var(--t3)}
+.field textarea{resize:vertical;min-height:72px;font-size:15px}
+.fh{font-size:11px;color:var(--t3);margin-top:5px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* PAYMENT PILLS */
+.pay-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.po{padding:12px 6px;border:1.5px solid var(--b2);border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;color:var(--t2);background:var(--surface);line-height:1.3}
+.po .poi{font-size:18px;display:block;margin-bottom:4px}
+.po.sel{background:var(--accent);color:white;border-color:var(--accent)}
+
+/* BUTTONS */
+.btn{padding:14px 20px;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;border:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-full{width:100%}
+.btn-p{background:var(--accent);color:white}
+.btn-s{background:var(--s2);color:var(--text);border:1.5px solid var(--b2)}
+.btn-w{background:#FEF3C7;color:#92400E;border:1.5px solid #FCD34D}
+.btn-d{background:var(--rbg);color:var(--red);border:1.5px solid #fca5a5}
+.btn-orange{background:var(--obg);color:var(--orange);border:1.5px solid #fed7aa}
+.btn-blue{background:var(--bbg);color:var(--blue);border:1.5px solid #93c5fd}
+.btn-print{padding:12px 18px;background:#1E40AF;color:white;border:none;border-radius:var(--rs);font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-sm{padding:8px 14px;font-size:13px}
+.btn-row{display:flex;gap:10px}
+
+/* SEARCH BAR */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-wrap input{width:100%;padding:13px 14px 13px 44px;font-size:15px;border:1.5px solid var(--b2);border-radius:var(--rs);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;-webkit-appearance:none}
+.search-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,58,42,.1)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none}
+.search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;cursor:pointer;color:var(--t3);display:none}
+.search-result-card{background:var(--surface);border:2px solid var(--accent);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.search-result-card .sr-title{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.track-timeline{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.track-step{display:flex;gap:12px;padding:8px 0;position:relative}
+.track-step::before{content:'';position:absolute;left:10px;top:28px;bottom:-8px;width:2px;background:var(--border)}
+.track-step:last-child::before{display:none}
+.track-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--b2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px}
+.track-dot.done{background:var(--green);border-color:var(--green);color:white}
+.track-dot.active{background:var(--accent);border-color:var(--accent);color:white}
+.track-info .tl{font-size:13px;font-weight:600}
+.track-info .ts{font-size:11px;color:var(--t3);margin-top:2px}
+
+/* PARCEL CARDS */
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;transition:border-color .15s}
+.pcard.selected{border-color:var(--accent);background:#f8fdf9}
+.pcard-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;cursor:pointer;transition:all .15s}
+.pcard-check.checked{background:var(--accent);border-color:var(--accent);color:white}
+.pcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px}
+.pcard-id{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--t2)}
+.pcard-cost{font-size:17px;font-weight:700;color:var(--accent)}
+.pcard-route{font-size:14px;font-weight:600;margin-bottom:4px}
+.pcard-desc{font-size:13px;color:var(--t2);margin-bottom:8px}
+.pcard-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.pcard-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid var(--border)}
+.edited-dot{width:7px;height:7px;border-radius:50%;background:#F59E0B;display:inline-block;margin-left:4px;vertical-align:middle}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-cash{background:var(--gbg);color:var(--green)}
+.b-upfront{background:var(--bbg);color:var(--blue)}
+.b-amka{background:var(--pbg);color:var(--purple)}
+.b-kidba{background:var(--abg);color:var(--amber)}
+.b-matta{background:var(--cbg);color:var(--coral)}
+.b-delivered{background:var(--gbg);color:var(--green)}
+.b-transit{background:var(--ibg);color:var(--indigo)}
+.b-dispatched{background:var(--obg);color:var(--orange)}
+.b-pending{background:var(--abg);color:var(--amber)}
+.b-term{background:var(--tbg);color:var(--teal)}
+
+/* DISPATCH */
+.dispatch-bar{background:var(--accent);color:white;padding:12px 16px;margin:0 -16px;display:none;align-items:center;justify-content:space-between;gap:8px;position:sticky;bottom:0}
+.dispatch-bar.show{display:flex}
+.dispatch-bar select{padding:8px 12px;border-radius:6px;border:none;font-size:14px;font-family:'DM Sans',sans-serif;background:rgba(255,255,255,.15);color:white;flex:1}
+.dispatch-bar select option{color:var(--text);background:white}
+.dispatch-btn{padding:10px 16px;background:white;color:var(--accent);border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+
+/* ISSUE PARCEL */
+.receive-box{background:var(--surface);border:2px dashed var(--b2);border-radius:var(--r);padding:24px;text-align:center;margin-bottom:16px}
+.receive-icon{font-size:40px;margin-bottom:10px}
+.code-input{font-size:26px;font-family:'DM Mono',monospace;font-weight:700;text-align:center;letter-spacing:4px;border:2px solid var(--b2);border-radius:var(--rs);padding:14px;width:100%;text-transform:uppercase}
+.code-input:focus{outline:none;border-color:var(--accent)}
+.found-parcel{background:var(--gbg);border:1px solid #b7e4c7;border-radius:var(--r);padding:16px;margin-top:16px;text-align:left}
+.found-parcel .fp-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px}
+.fp-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(45,106,79,.15);font-size:13px;gap:8px}
+.fp-row:last-child{border-bottom:none}
+.fp-row span{color:var(--t2);flex-shrink:0}
+.fp-row strong{text-align:right;font-weight:600}
+.sms-preview{background:var(--s2);border-radius:var(--rs);padding:12px 14px;margin-top:10px;font-size:13px;color:var(--t2);border-left:3px solid var(--accent);font-style:italic}
+.sms-sent{background:var(--tbg);border:1px solid var(--teal);border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--teal);margin-top:10px;display:flex;align-items:center;gap:8px}
+
+/* REPORTS DATE RANGE */
+.date-range-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.date-range-bar .dr-title{font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.period-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ppill{padding:6px 14px;border:1.5px solid var(--b2);border-radius:20px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;background:var(--surface);white-space:nowrap}
+.ppill.active{background:var(--accent);color:white;border-color:var(--accent)}
+.date-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.date-inputs input{padding:10px 12px;font-size:14px;border:1.5px solid var(--b2);border-radius:var(--rs);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;width:100%;-webkit-appearance:none}
+.date-inputs input:focus{outline:none;border-color:var(--accent)}
+
+/* PIE CHART */
+.pie-wrap{position:relative;display:flex;flex-direction:column;align-items:center;margin:14px 0}
+.pie-canvas{cursor:pointer}
+.pie-legend{display:flex;flex-direction:column;gap:6px;margin-top:14px;width:100%}
+.pie-legend-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;transition:background .15s;border:1.5px solid transparent}
+.pie-legend-item:hover{background:var(--s2)}
+.pie-legend-item.hl{background:var(--al);border-color:var(--accent)}
+.pie-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pie-legend-label{font-size:13px;font-weight:600;flex:1}
+.pie-legend-val{font-size:13px;font-weight:700;color:var(--accent)}
+.pie-legend-pct{font-size:11px;color:var(--t3);margin-left:4px}
+.pie-detail-panel{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px;display:none}
+.pie-detail-panel.show{display:block}
+.pie-detail-title{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* REPORT SUMMARY */
+.rsum{background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.rsumg .rhl{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.rsumg .rhv{font-size:16px;font-weight:700}
+
+/* VEHICLE CARD */
+.vcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.vcard-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.vplate{font-family:'DM Mono',monospace;font-weight:700;font-size:16px;background:var(--accent);color:white;padding:5px 14px;border-radius:var(--rs);letter-spacing:1px}
+.vrev-amt{font-size:18px;font-weight:700;color:var(--green)}
+.vrev-sub{font-size:11px;color:var(--t3)}
+.vrow{padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.vrow:last-child{border-bottom:none}
+.vrow-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--t3)}
+.vrow-name{font-size:13px;font-weight:600;margin-top:1px}
+.vrow-desc{font-size:12px;color:var(--t2)}
+.vrow-right{text-align:right;flex-shrink:0;margin-left:8px}
+.vrow-cost{font-size:14px;font-weight:700}
+.vrow-badges{display:flex;gap:4px;justify-content:flex-end;margin-top:3px;flex-wrap:wrap}
+
+/* ADMIN */
+.urow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.urow:last-child{border-bottom:none}
+.urow-name{font-size:14px;font-weight:600}
+.urow-un{font-size:12px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:1px}
+
+/* BOTTOM DRAWER */
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200}
+.drawer-overlay.open{display:flex;align-items:flex-end}
+.drawer{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(20px + env(safe-area-inset-bottom))}
+.drawer-handle{width:40px;height:4px;background:var(--b2);border-radius:2px;margin:0 auto 16px}
+.drawer-title{font-size:17px;font-weight:700;margin-bottom:16px}
+.drawer-actions{display:flex;flex-direction:column;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* FILTERS */
+.fbar{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.fbar::-webkit-scrollbar{display:none}
+.fpill{padding:7px 14px;border:1.5px solid var(--b2);border-radius:20px;font-size:13px;font-weight:600;color:var(--t2);white-space:nowrap;background:var(--surface);cursor:pointer;flex-shrink:0}
+.fpill.active{background:var(--accent);color:white;border-color:var(--accent)}
+
+/* EMPTY / TOAST */
+.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.toast{position:fixed;bottom:calc(var(--tab-h) + 12px);left:16px;right:16px;background:#1a1917;color:white;padding:14px 18px;border-radius:var(--r);font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.25);transform:translateY(20px);opacity:0;transition:all .25s;z-index:999;text-align:center}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* DESKTOP */
+@media(min-width:768px){
+  .body-scroll{bottom:0}
+  .tab-bar{display:none}
+  #main-app{flex-direction:row!important}
+  .dsk-sidebar{display:flex!important;flex-direction:column;width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:var(--hdr-h);left:0;bottom:0;overflow-y:auto;padding:16px 0;z-index:40}
+  .body-scroll{left:220px}
+  .main{padding:24px}
+  .toast{left:240px;right:16px;bottom:16px}
+  .metrics{grid-template-columns:repeat(4,1fr)}
+  .fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pie-wrap{flex-direction:row;align-items:flex-start;gap:20px}
+  .pie-legend{margin-top:0;flex:1}
+}
+.dsk-sidebar{display:none}
+.sl{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--t3);padding:0 16px 8px;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--t2);border-left:3px solid transparent;transition:all .15s}
+.ni:hover{background:var(--bg);color:var(--text)}
+.ni.active{background:var(--al);color:var(--accent);border-left-color:var(--accent);font-weight:700}
+.ni.locked{opacity:.35;cursor:not-allowed}
+.ni.locked:hover{background:transparent}
+.ni-icon{font-size:15px;width:20px;text-align:center}
+
+@media print{
+  .tab-bar,.hdr,.dsk-sidebar,.btn,.btn-sm,.btn-print,.fbar,.dispatch-bar,.drawer-overlay,.toast,.search-wrap,.date-range-bar,.period-pills,.pie-wrap{display:none!important}
+  body{background:white}
+  .body-scroll{position:static;overflow:visible}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="llogo"><div class="llogo-icon">📦</div><h1>NMD Deliveries</h1><p>Nairobi–Mandera Parcel System</p></div>
+    <div class="lf"><label>Username</label><input type="text" id="lu" placeholder="Enter username" autocomplete="username" autocapitalize="none"></div>
+    <div class="lf"><label>Password</label><input type="password" id="lp" placeholder="Enter password" autocomplete="current-password"></div>
+    <button class="lbtn" onclick="doLogin()">Sign In →</button>
+    <div class="lerr" id="lerr">Incorrect username or password</div>
+    <div class="ldemo">
+      <strong>Demo Accounts</strong>
+      <div class="drow"><div class="drow-creds"><strong>staff1</strong><span>staff123 — Intake, Dispatch, Issue</span></div><span class="rchip r-staff">👷 Staff</span></div>
+      <div class="drow"><div class="drow-creds"><strong>supervisor1</strong><span>super123 — Reports, Edit, Dispatch, Issue</span></div><span class="rchip r-supervisor">🗂 Supervisor</span></div>
+      <div class="drow"><div class="drow-creds"><strong>admin</strong><span>admin123 — Full Access</span></div><span class="rchip r-admin">🛡 Admin</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app">
+  <nav class="dsk-sidebar" id="dsk-sidebar"></nav>
+  <header class="hdr">
+    <div class="hbrand"><span style="font-size:20px">📦</span><div><div class="htitle">NMD Deliveries</div><div class="hsub">Nairobi–Mandera</div></div></div>
+    <div class="hright">
+      <div class="uchip"><div class="uav" id="uav"></div><div><div class="uname" id="uname"></div><div class="urole" id="urole"></div></div></div>
+      <button class="logout-btn" onclick="doLogout()">Out</button>
+    </div>
+  </header>
+  <div class="body-scroll">
+    <div class="main">
+      <div class="tab active" id="tab-intake"></div>
+      <div class="tab" id="tab-parcels"></div>
+      <div class="tab" id="tab-dispatch"></div>
+      <div class="tab" id="tab-issue"></div>
+      <div class="tab" id="tab-reports"></div>
+      <div class="tab" id="tab-vehicles"></div>
+      <div class="tab" id="tab-admin"></div>
+    </div>
+  </div>
+  <nav class="tab-bar" id="tab-bar"></nav>
+</div>
+
+<!-- EDIT PARCEL DRAWER -->
+<div class="drawer-overlay" id="drw-edit">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">✏️ Edit Parcel <span id="epid" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--t3)"></span></div>
+    <div class="fg"><div class="field"><label>Sender Name</label><input id="es"></div><div class="field"><label>Sender Phone</label><input id="esp" type="tel"></div></div>
+    <div class="fg"><div class="field"><label>Receiver Name</label><input id="er"></div><div class="field"><label>Receiver Phone</label><input id="erp" type="tel"></div></div>
+    <div class="field"><label>Address in Mandera</label><input id="eaddr"></div>
+    <div class="fg"><div class="field"><label>Description</label><input id="edesc"></div><div class="field"><label>Goods Value (KES)</label><input id="ewt" type="number" inputmode="numeric"></div></div>
+    <div class="fg"><div class="field"><label>Delivery Cost (KES)</label><input id="ecost" type="number" inputmode="numeric"></div>
+    <div class="field"><label>Status</label><select id="estat"><option value="pending">Pending</option><option value="dispatched">Dispatched</option><option value="intransit">In Transit</option><option value="delivered">Delivered</option></select></div></div>
+    <div class="field"><label>Vehicle</label><select id="eveh"></select></div>
+    <div class="field"><label>Payment Type</label><select id="epay" onchange="etogglePart()"><option value="cash">Cash on Delivery</option><option value="upfront">Upfront Payment</option><option value="partner">Partner Account</option></select></div>
+    <div id="epf" style="display:none">
+      <div class="fg"><div class="field"><label>Partner</label><select id="epart"><option value="AMKA">AMKA</option><option value="KIDBA">KIDBA</option><option value="MATTA">MATTA</option></select></div>
+      <div class="field"><label>Payment Term</label><select id="eterm" onchange="etogCT()"><option value="3days">3 Days</option><option value="1week">1 Week</option><option value="2weeks">2 Weeks</option><option value="1month">1 Month</option><option value="custom">Custom…</option></select></div></div>
+      <div class="field" id="ectf" style="display:none"><label>Custom Term</label><input id="ect" placeholder="e.g. 45 days, end of quarter…"></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="enotes"></textarea></div>
+    <div class="field"><label>Reason for Edit ✱</label><input id="ereason" placeholder="Briefly state reason for correction…"></div>
+    <div class="drawer-actions">
+      <button class="btn btn-w btn-full" onclick="saveEdit()">✔ Save Changes</button>
+      <button class="btn btn-s btn-full" onclick="closeD('drw-edit')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD VEHICLE DRAWER -->
+<div class="drawer-overlay" id="drw-veh">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">🚛 Add Vehicle</div>
+    <div class="fg"><div class="field"><label>Plate Number</label><input id="mvp" placeholder="e.g. KDF 001D" autocapitalize="characters"></div><div class="field"><label>Type</label><select id="mvt"><option>Pickup</option><option>Van</option><option>Lorry</option><option>Truck</option></select></div></div>
+    <div class="fg"><div class="field"><label>Driver Name</label><input id="mvd" placeholder="Full name"></div><div class="field"><label>Capacity (kg)</label><input id="mvc" type="number" inputmode="numeric" placeholder="500"></div></div>
+    <div class="drawer-actions"><button class="btn btn-p btn-full" onclick="addVehicle()">Add Vehicle</button><button class="btn btn-s btn-full" onclick="closeD('drw-veh')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ADD USER DRAWER -->
+<div class="drawer-overlay" id="drw-user">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">👤 Add User</div>
+    <div class="fg"><div class="field"><label>Full Name</label><input id="nun" placeholder="Full name"></div><div class="field"><label>Username</label><input id="nuu" placeholder="Login username" autocapitalize="none"></div></div>
+    <div class="fg"><div class="field"><label>Password</label><input id="nupw" type="password"></div><div class="field"><label>Role</label><select id="nur"><option value="staff">Staff</option><option value="supervisor">Supervisor</option><option value="admin">Admin</option></select></div></div>
+    <div class="drawer-actions"><button class="btn btn-p btn-full" onclick="addUser()">Add User</button><button class="btn btn-s btn-full" onclick="closeD('drw-user')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- PIE DETAIL DRAWER -->
+<div class="drawer-overlay" id="drw-pie">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title" id="pie-drw-title">Details</div>
+    <div id="pie-drw-body"></div>
+    <div class="drawer-actions"><button class="btn btn-s btn-full" onclick="closeD('drw-pie')">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const UK='nmd_u4',DK='nmd_d4';
+const DU=[
+  {id:'u1',name:'Staff Member',username:'staff1',password:'staff123',role:'staff'},
+  {id:'u2',name:'Supervisor',username:'supervisor1',password:'super123',role:'supervisor'},
+  {id:'u3',name:'Admin User',username:'admin',password:'admin123',role:'admin'},
+];
+let users=[],sess={user:null};
+let S={parcels:[],vehicles:[{id:'KBZ 123A',driver:'Ali Hassan',type:'Pickup',capacity:500},{id:'KDA 456B',driver:'Mussa Odhiambo',type:'Van',capacity:1000},{id:'KCE 789C',driver:'Patrick Mwenda',type:'Pickup',capacity:500}],nextId:1,smsLog:[]};
+const RL={staff:'Staff',supervisor:'Supervisor',admin:'Administrator'};
+const RI={staff:'👷',supervisor:'🗂️',admin:'🛡️'};
+const RC={staff:'r-staff',supervisor:'r-supervisor',admin:'r-admin'};
+
+function can(p){return({
+  staff:   {intake:true,parcels:true,dispatch:true,issue:true,reports:false,vehicles:true,admin:false,edit:false},
+  supervisor:{intake:false,parcels:true,dispatch:true,issue:true,reports:true,vehicles:true,admin:false,edit:true},
+  admin:   {intake:true,parcels:true,dispatch:true,issue:true,reports:true,vehicles:true,admin:true,edit:true}
+}[role()]||{})[p]||false;}
+
+const SP=[
+  {id:'P0001',date:'2025-04-20',sender:'John Mwangi',senderPhone:'0712345678',receiver:'Halima Aden',receiverPhone:'0722111001',address:'Mandera Town, Opp. Equity Bank',description:'Electronics',goodsValue:8000,cost:1200,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'HAD001',notes:'Handle with care',recordedBy:'Staff Member',recordedAt:'2025-04-20T08:10:00Z',dispatchedAt:'2025-04-20T10:00:00Z',intransitAt:'2025-04-20T18:00:00Z',deliveredAt:'2025-04-21T14:00:00Z',issuedTo:'Halima Aden',issuedId:'12345678',editLog:[]},
+  {id:'P0002',date:'2025-04-21',sender:'Amina Wanjiru',senderPhone:'0723456789',receiver:'Hassan Omar',receiverPhone:'0733222002',address:'Lafey Road, Mandera',description:'Clothes & Shoes',goodsValue:5000,cost:850,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'HOM002',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-21T09:30:00Z',dispatchedAt:'2025-04-21T11:00:00Z',intransitAt:'2025-04-21T19:00:00Z',deliveredAt:'2025-04-22T15:00:00Z',issuedTo:'Hassan Omar',issuedId:'23456789',editLog:[]},
+  {id:'P0003',date:'2025-04-21',sender:'Peter Kamau',senderPhone:'0734567890',receiver:'Fatuma Ali',receiverPhone:'0744333003',address:'Near Mandera District Hospital',description:'Medicine & Supplements',goodsValue:3500,cost:600,payment:'partner',partner:'AMKA',term:'1week',customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'FAL003',notes:'Urgent',recordedBy:'Staff Member',recordedAt:'2025-04-21T10:00:00Z',dispatchedAt:'2025-04-21T12:00:00Z',intransitAt:'2025-04-21T20:00:00Z',deliveredAt:'2025-04-22T16:00:00Z',issuedTo:'Fatuma Ali',issuedId:'34567890',editLog:[]},
+  {id:'P0004',date:'2025-04-22',sender:'Grace Otieno',senderPhone:'0745678901',receiver:'Ibrahim Said',receiverPhone:'0755444004',address:'Mandera Central Market',description:'Food Items & Groceries',goodsValue:12000,cost:1800,payment:'partner',partner:'KIDBA',term:'2weeks',customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'ISA004',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-22T07:45:00Z',dispatchedAt:'2025-04-22T09:00:00Z',intransitAt:'2025-04-22T17:00:00Z',deliveredAt:'2025-04-23T14:00:00Z',issuedTo:'Ibrahim Said',issuedId:'45678901',editLog:[]},
+  {id:'P0005',date:'2025-04-22',sender:'David Njiru',senderPhone:'0756789012',receiver:'Maryam Hassan',receiverPhone:'0766555005',address:'Mandera East, Phase 2',description:'Documents & Files',goodsValue:1000,cost:350,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KCE 789C',status:'delivered',trackCode:'MHA005',notes:'Confidential',recordedBy:'Staff Member',recordedAt:'2025-04-22T11:20:00Z',dispatchedAt:'2025-04-22T13:00:00Z',intransitAt:'2025-04-22T21:00:00Z',deliveredAt:'2025-04-23T15:30:00Z',issuedTo:'Maryam Hassan',issuedId:'56789012',editLog:[]},
+  {id:'P0006',date:'2025-04-23',sender:'Sarah Muthoni',senderPhone:'0767890123',receiver:'Abdi Warsame',receiverPhone:'0777666006',address:'Takaba Road, Mandera',description:'Hardware & Tools',goodsValue:25000,cost:3200,payment:'partner',partner:'MATTA',term:'1month',customTerm:null,vehicle:'KCE 789C',status:'delivered',trackCode:'AWA006',notes:'Heavy',recordedBy:'Staff Member',recordedAt:'2025-04-23T08:00:00Z',dispatchedAt:'2025-04-23T10:00:00Z',intransitAt:'2025-04-23T18:00:00Z',deliveredAt:'2025-04-24T16:00:00Z',issuedTo:'Abdi Warsame',issuedId:'67890123',editLog:[]},
+  {id:'P0007',date:'2025-04-24',sender:'James Oloo',senderPhone:'0778901234',receiver:'Khadija Farah',receiverPhone:'0788777007',address:'Mandera Town Centre',description:'Shoes & Bags',goodsValue:6500,cost:750,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'KFA007',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-24T09:15:00Z',dispatchedAt:'2025-04-24T11:00:00Z',intransitAt:'2025-04-24T19:00:00Z',deliveredAt:'2025-04-25T14:00:00Z',issuedTo:'Khadija Farah',issuedId:'78901234',editLog:[]},
+  {id:'P0008',date:'2025-04-25',sender:'Ruth Akinyi',senderPhone:'0789012345',receiver:'Yahya Mohamed',receiverPhone:'0799888008',address:'Near Mandera Police Station',description:'Spare Parts',goodsValue:18000,cost:2400,payment:'partner',partner:'AMKA',term:'custom',customTerm:'45 days',vehicle:'KDA 456B',status:'delivered',trackCode:'YMO008',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-25T10:30:00Z',dispatchedAt:'2025-04-25T12:00:00Z',intransitAt:'2025-04-25T20:00:00Z',deliveredAt:'2025-04-26T15:00:00Z',issuedTo:'Yahya Mohamed',issuedId:'89012345',editLog:[]},
+  {id:'P0009',date:'2025-04-26',sender:'Ali Hassan Gure',senderPhone:'0700123456',receiver:'Nasrin Abdi',receiverPhone:'0711999009',address:'Mandera North, Dandu Area',description:'Baby Items & Diapers',goodsValue:7500,cost:1100,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'intransit',trackCode:'NAB009',notes:'Call on arrival',recordedBy:'Staff Member',recordedAt:'2025-04-26T07:00:00Z',dispatchedAt:'2025-04-26T09:00:00Z',intransitAt:'2025-04-26T17:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0010',date:'2025-04-26',sender:'Fatma Ndegwa',senderPhone:'0701234567',receiver:'Omar Sheikh',receiverPhone:'0712000010',address:'Lafey District, Mandera',description:'Textbooks & Stationery',goodsValue:4500,cost:900,payment:'partner',partner:'KIDBA',term:'3days',customTerm:null,vehicle:'KCE 789C',status:'intransit',trackCode:'OSH010',notes:'School supplies',recordedBy:'Staff Member',recordedAt:'2025-04-26T08:40:00Z',dispatchedAt:'2025-04-26T10:00:00Z',intransitAt:'2025-04-26T18:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0011',date:'2025-04-27',sender:'Moses Kipchoge',senderPhone:'0702345678',receiver:'Hodan Ahmed',receiverPhone:'0713100011',address:'Mandera Town, Garissa Road',description:'Electronics — Phones',goodsValue:35000,cost:2800,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'dispatched',trackCode:'HAH011',notes:'High value',recordedBy:'Staff Member',recordedAt:'2025-04-27T09:00:00Z',dispatchedAt:'2025-04-27T11:00:00Z',intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[{by:'Supervisor',at:'2025-04-27T14:00:00Z',reason:'Corrected receiver phone number'}]},
+  {id:'P0012',date:'2025-04-27',sender:'Naomi Waweru',senderPhone:'0703456789',receiver:'Ismail Duale',receiverPhone:'0714200012',address:'Near Mandera County Hospital',description:'Medical Equipment',goodsValue:45000,cost:4500,payment:'partner',partner:'MATTA',term:'2weeks',customTerm:null,vehicle:'KBZ 123A',status:'dispatched',trackCode:'IDU012',notes:'Fragile',recordedBy:'Staff Member',recordedAt:'2025-04-27T10:15:00Z',dispatchedAt:'2025-04-27T12:00:00Z',intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0013',date:'2025-04-28',sender:'Joseph Mutua',senderPhone:'0704567890',receiver:'Asad Warsame',receiverPhone:'0715300013',address:'Mandera West, Elwak',description:'Household Goods',goodsValue:22000,cost:3800,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'AWA013',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-28T07:30:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0014',date:'2025-04-28',sender:'Elizabeth Wambui',senderPhone:'0705678901',receiver:'Safia Nur',receiverPhone:'0716400014',address:'Mandera Town, Market Area',description:'Fabric & Tailoring Materials',goodsValue:9000,cost:1350,payment:'partner',partner:'AMKA',term:'1week',customTerm:null,vehicle:null,status:'pending',trackCode:'SNU014',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-28T11:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0015',date:'2025-04-29',sender:'Samuel Karanja',senderPhone:'0706789012',receiver:'Abshir Hassan',receiverPhone:'0717500015',address:'Banissa, Mandera County',description:'Solar Panels & Batteries',goodsValue:80000,cost:6500,payment:'partner',partner:'KIDBA',term:'custom',customTerm:'End of month',vehicle:null,status:'pending',trackCode:'AHA015',notes:'Very heavy',recordedBy:'Staff Member',recordedAt:'2025-04-29T08:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0016',date:'2025-04-29',sender:'Lucy Njeri',senderPhone:'0707890123',receiver:'Mohamed Bare',receiverPhone:'0718600016',address:'Mandera Town Centre',description:'Cosmetics & Beauty Products',goodsValue:11000,cost:980,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'MBA016',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-29T09:45:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0017',date:'2025-04-30',sender:'Charles Otieno',senderPhone:'0708901234',receiver:'Ruqiya Abdi',receiverPhone:'0719700017',address:'Rhamu, Mandera County',description:'Tyres & Auto Parts',goodsValue:55000,cost:5200,payment:'partner',partner:'MATTA',term:'2weeks',customTerm:null,vehicle:null,status:'pending',trackCode:'RAB017',notes:'Large package',recordedBy:'Staff Member',recordedAt:'2025-04-30T07:15:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0018',date:'2025-04-30',sender:'Margaret Wanjiku',senderPhone:'0709012345',receiver:'Yusuf Omar',receiverPhone:'0720800018',address:'Mandera East',description:'Furniture Parts',goodsValue:30000,cost:4100,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'YOU018',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-30T10:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0019',date:'2025-05-01',sender:'Brian Ochieng',senderPhone:'0710123456',receiver:'Fardowsa Ahmed',receiverPhone:'0721900019',address:'Mandera Town, Near Mosque',description:'Frozen Foods (Insulated)',goodsValue:8500,cost:1600,payment:'partner',partner:'AMKA',term:'3days',customTerm:null,vehicle:null,status:'pending',trackCode:'FAH019',notes:'Perishable',recordedBy:'Staff Member',recordedAt:'2025-05-01T06:30:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0020',date:'2025-05-01',sender:'Winnie Chebet',senderPhone:'0711234567',receiver:'Abdullahi Sheikh',receiverPhone:'0722000020',address:'Mandera North',description:'Computers & Accessories',goodsValue:65000,cost:3500,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'ASH020',notes:'High value',recordedBy:'Staff Member',recordedAt:'2025-05-01T08:20:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+];
+
+function loadAll(){
+  try{
+    const u=localStorage.getItem(UK);users=u?JSON.parse(u):[...DU];
+    const d=localStorage.getItem(DK);
+    if(d){const p=JSON.parse(d);S.parcels=p.parcels||[];S.vehicles=p.vehicles||S.vehicles;S.nextId=p.nextId||1;S.smsLog=p.smsLog||[];}
+    else{S.parcels=SP.map(p=>({...p}));S.nextId=21;saveD();}
+  }catch(e){users=[...DU];}
+}
+function saveU(){localStorage.setItem(UK,JSON.stringify(users));}
+function saveD(){localStorage.setItem(DK,JSON.stringify({parcels:S.parcels,vehicles:S.vehicles,nextId:S.nextId,smsLog:S.smsLog}));}
+function role(){return sess.user?.role;}
+function fmtKES(n){return'KES '+Number(n||0).toLocaleString();}
+function pid(){return'P'+String(S.nextId).padStart(4,'0');}
+function genCode(r){return(r.replace(/\s+/g,'').substring(0,3).toUpperCase()+String(S.nextId).padStart(3,'0'));}
+function toast(m,d=2800){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+function closeD(id){document.getElementById(id).classList.remove('open');}
+function openD(id){document.getElementById(id).classList.add('open');}
+document.querySelectorAll('.drawer-overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
+
+function sendSMS(phone,msg,ctx){S.smsLog=S.smsLog||[];S.smsLog.unshift({to:phone,msg,context:ctx,sentAt:new Date().toISOString(),by:sess.user?.name||'System'});saveD();}
+
+function badge(pay,par){
+  if(pay==='cash')return'<span class="badge b-cash">💵 Cash</span>';
+  if(pay==='upfront')return'<span class="badge b-upfront">💳 Upfront</span>';
+  if(par==='AMKA')return'<span class="badge b-amka">AMKA</span>';
+  if(par==='KIDBA')return'<span class="badge b-kidba">KIDBA</span>';
+  if(par==='MATTA')return'<span class="badge b-matta">MATTA</span>';
+  return'';
+}
+function sbadge(s){
+  if(s==='delivered')return'<span class="badge b-delivered">✓ Delivered</span>';
+  if(s==='intransit')return'<span class="badge b-transit">🔄 In Transit</span>';
+  if(s==='dispatched')return'<span class="badge b-dispatched">🚛 Dispatched</span>';
+  return'<span class="badge b-pending">⏳ Pending</span>';
+}
+function tlabel(term,cterm){if(!term)return'';const m={'3days':'3 Days','1week':'1 Week','2weeks':'2 Weeks','1month':'1 Month'};return'<span class="badge b-term">'+(term==='custom'?(cterm||'Custom'):m[term]||term)+'</span>';}
+function rbanner(){
+  const r=role(),msgs={staff:'Intake, Dispatch, Issue & Vehicles.',supervisor:'All Parcels, Reports, Edit, Dispatch & Issue.',admin:'Full access — all modules.'};
+  return`<div class="rbanner ${r}">${RI[r]} <span><strong>${RL[r]}</strong>: ${msgs[r]}</span></div>`;
+}
+
+/* AUTH */
+function doLogin(){
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  const found=users.find(x=>x.username===u&&x.password===p);
+  if(!found){document.getElementById('lerr').style.display='block';return;}
+  document.getElementById('lerr').style.display='none';
+  sess.user=found;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  initApp();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin();});
+function doLogout(){sess.user=null;document.getElementById('main-app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('lu').value='';document.getElementById('lp').value='';}
+
+function initApp(){
+  document.getElementById('uname').textContent=sess.user.name;
+  document.getElementById('urole').textContent=RL[role()];
+  document.getElementById('uav').textContent=sess.user.name[0].toUpperCase();
+  buildTabBar();buildDeskSidebar();
+  switchTab(role()==='supervisor'?'parcels':'intake');
+}
+
+const TABS=[
+  {id:'intake',icon:'📋',label:'Intake',p:'intake'},
+  {id:'parcels',icon:'📦',label:'Parcels',p:'parcels'},
+  {id:'dispatch',icon:'🚛',label:'Dispatch',p:'dispatch'},
+  {id:'issue',icon:'✅',label:'Issue',p:'issue'},
+  {id:'reports',icon:'📊',label:'Reports',p:'reports'},
+  {id:'vehicles',icon:'🏎️',label:'Vehicles',p:'vehicles'},
+  {id:'admin',icon:'🛡️',label:'Admin',p:'admin'},
+];
+function buildTabBar(){
+  document.getElementById('tab-bar').innerHTML=TABS.map(t=>{
+    const ok=can(t.p);
+    return`<button class="tbi${ok?'':' locked'}" id="tbi-${t.id}" ${ok?`onclick="switchTab('${t.id}')"`:'title="Restricted"'} data-tab="${t.id}">
+      <span class="tbi-icon">${ok?t.icon:'🔒'}</span><span class="tbi-label">${t.label}</span></button>`;
+  }).join('');
+}
+function buildDeskSidebar(){
+  const tools=[{icon:'🖨️',label:'Print',act:"window.print()"},{icon:'⬇️',label:'Export CSV',act:"exportCSV()"}];
+  if(role()==='admin')tools.push({icon:'🗑️',label:'Clear Data',act:"clearAll()"});
+  let h=`<div class="sl">Navigation</div>`;
+  TABS.forEach(t=>{const ok=can(t.p);h+=`<div class="ni${ok?'':' locked'}" id="dni-${t.id}" ${ok?`onclick="switchTab('${t.id}')"`:''}><span class="ni-icon">${ok?t.icon:'🔒'}</span>${t.label}</div>`;});
+  h+=`<div style="margin-top:20px"><div class="sl">Tools</div>`;
+  tools.forEach(t=>h+=`<div class="ni" onclick="${t.act}"><span class="ni-icon">${t.icon}</span>${t.label}</div>`);
+  h+=`</div>`;
+  document.getElementById('dsk-sidebar').innerHTML=h;
+}
+
+let curTab='intake';
+function switchTab(tab){
+  if(!can(tab)){toast('⛔ Access restricted for your role');return;}
+  curTab=tab;
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelectorAll('.tbi').forEach(e=>e.classList.toggle('active',e.dataset.tab===tab));
+  document.querySelectorAll('.ni').forEach(e=>e.classList.toggle('active',e.id==='dni-'+tab));
+  ({intake:renderIntake,parcels:renderParcels,dispatch:renderDispatch,issue:renderIssue,reports:renderReports,vehicles:renderVehicles,admin:renderAdmin}[tab]||renderIntake)();
+  document.querySelector('.body-scroll').scrollTop=0;
+}
+
+/* ══ INTAKE ══ */
+let curPay='cash';
+function renderIntake(){
+  const el=document.getElementById('tab-intake');
+  el.innerHTML=rbanner()+`<div class="card">
+    <div class="ct">📋 New Parcel — Nairobi to Mandera</div>
+    <div class="fg"><div class="field"><label>Parcel ID</label><input id="fid" disabled></div><div class="field"><label>Date</label><input id="fdt" type="date"></div></div>
+    <div class="field"><label>Sender Name</label><input id="fsn" placeholder="Full name" autocomplete="name"></div>
+    <div class="field"><label>Sender Phone</label><input id="fsp" type="tel" placeholder="07XXXXXXXX" inputmode="tel"></div>
+    <div class="field"><label>Receiver Name</label><input id="frn" placeholder="Full name"></div>
+    <div class="field"><label>Receiver Phone</label><input id="frp" type="tel" placeholder="07XXXXXXXX" inputmode="tel"><div class="fh">📱 Tracking code SMS sent to this number immediately</div></div>
+    <div class="field"><label>Receiver Address (Mandera)</label><input id="faddr" placeholder="e.g. Mandera Town, near market"></div>
+    <div class="field"><label>Description of Goods</label><input id="fdesc" placeholder="e.g. Electronics, Clothes, Food"></div>
+    <div class="fg">
+      <div class="field"><label>Value of Goods (KES)</label><input id="fgv" type="number" min="0" placeholder="0" inputmode="numeric"><div class="fh">Declared value</div></div>
+      <div class="field"><label>Delivery Cost (KES)</label><input id="fcost" type="number" min="0" placeholder="0" inputmode="numeric"></div>
+    </div>
+    <div class="field"><label>Payment Method</label></div>
+    <div class="pay-opts">
+      <div class="po sel" data-v="cash" onclick="selPay('cash')"><span class="poi">💵</span>Cash on Delivery</div>
+      <div class="po" data-v="upfront" onclick="selPay('upfront')"><span class="poi">💳</span>Upfront</div>
+      <div class="po" data-v="partner" onclick="selPay('partner')"><span class="poi">🤝</span>Partner</div>
+    </div>
+    <div id="ipf" style="display:none">
+      <div class="fg"><div class="field"><label>Partner</label><select id="fpart"><option value="AMKA">AMKA</option><option value="KIDBA">KIDBA</option><option value="MATTA">MATTA</option></select></div>
+      <div class="field"><label>Payment Term</label><select id="fterm" onchange="iTogCT()"><option value="3days">3 Days</option><option value="1week">1 Week</option><option value="2weeks">2 Weeks</option><option value="1month">1 Month</option><option value="custom">Custom…</option></select></div></div>
+      <div class="field" id="ictf" style="display:none"><label>Custom Payment Term</label><input id="fct" placeholder="e.g. 45 days, end of quarter…"><div class="fh">Specify the agreed timeline</div></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="fnotes" placeholder="Fragile, call before delivery..."></textarea></div>
+    <div class="btn-row"><button class="btn btn-p" style="flex:1" onclick="addParcel()">✔ Record & Send SMS</button><button class="btn btn-s btn-sm" onclick="renderIntake()">Clear</button></div>
+    <div id="sms-confirm" style="display:none;margin-top:12px"></div>
+  </div>`;
+  curPay='cash';
+  document.getElementById('fid').value=pid();
+  document.getElementById('fdt').value=new Date().toISOString().slice(0,10);
+}
+function selPay(v){curPay=v;document.querySelectorAll('.po').forEach(e=>e.classList.toggle('sel',e.dataset.v===v));document.getElementById('ipf').style.display=v==='partner'?'block':'none';if(v!=='partner'){const c=document.getElementById('ictf');if(c)c.style.display='none';}}
+function iTogCT(){const v=document.getElementById('fterm')?.value,c=document.getElementById('ictf');if(c)c.style.display=v==='custom'?'block':'none';}
+function gv(id){return document.getElementById(id)?.value?.trim()||'';}
+function addParcel(){
+  const sn=gv('fsn'),rn=gv('frn'),cost=parseFloat(gv('fcost')||0),gval=parseFloat(gv('fgv')||0),rph=gv('frp');
+  if(!sn||!rn||!cost){toast('⚠ Sender, Receiver and Delivery Cost required');return;}
+  if(!rph){toast('⚠ Receiver phone required for SMS');return;}
+  const term=curPay==='partner'?gv('fterm'):'';
+  const newId=pid();const trackCode=genCode(rn);
+  const parcel={id:newId,date:gv('fdt'),sender:sn,senderPhone:gv('fsp'),receiver:rn,receiverPhone:rph,address:gv('faddr'),description:gv('fdesc')||'General',goodsValue:gval,cost,payment:curPay,partner:curPay==='partner'?gv('fpart'):null,term:curPay==='partner'?term:null,customTerm:term==='custom'?gv('fct'):null,vehicle:null,status:'pending',trackCode,notes:gv('fnotes'),recordedBy:sess.user.name,recordedAt:new Date().toISOString(),dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]};
+  S.parcels.unshift(parcel);S.nextId++;
+  const smsMsg=`Dear ${rn}, your parcel from ${sn} is booked with NMD Deliveries. Tracking Code: ${trackCode}. Present this code at Mandera office to collect your parcel. Addr: ${gv('faddr')||'Mandera Office'}`;
+  sendSMS(rph,smsMsg,'intake:'+newId);saveD();
+  const sc=document.getElementById('sms-confirm');
+  if(sc){sc.style.display='block';sc.innerHTML=`<div class="sms-sent">📱 SMS sent to ${rph} with code <strong>${trackCode}</strong></div><div class="sms-preview">"${smsMsg}"</div>`;}
+  toast('✓ Parcel '+newId+' recorded! SMS sent.');
+}
+
+/* ══ ALL PARCELS ══ */
+let pFilter={status:'',payment:'',q:''};
+function renderParcels(){
+  const el=document.getElementById('tab-parcels');
+  const canEd=can('edit');
+  el.innerHTML=rbanner()+`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="pg-title">📦 All Parcels</div>
+    ${can('reports')?'<button class="btn-print btn-sm" onclick="window.print()">🖨️ Print</button>':''}
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="psearch" placeholder="Search by parcel ID, name, tracking code…" oninput="onSearch()" autocomplete="off">
+    <span class="search-clear" id="search-clear" onclick="clearSearch()">✕</span>
+  </div>
+  <div id="search-result-area"></div>
+  <div class="fbar">
+    <div class="fpill${!pFilter.status&&!pFilter.payment?' active':''}" onclick="setPF('','')">All</div>
+    <div class="fpill${pFilter.status==='pending'?' active':''}" onclick="setPF('status','pending')">⏳ Pending</div>
+    <div class="fpill${pFilter.status==='dispatched'?' active':''}" onclick="setPF('status','dispatched')">🚛 Dispatched</div>
+    <div class="fpill${pFilter.status==='intransit'?' active':''}" onclick="setPF('status','intransit')">🔄 In Transit</div>
+    <div class="fpill${pFilter.status==='delivered'?' active':''}" onclick="setPF('status','delivered')">✓ Delivered</div>
+    <div class="fpill${pFilter.payment==='cash'?' active':''}" onclick="setPF('payment','cash')">💵 Cash</div>
+    <div class="fpill${pFilter.payment==='upfront'?' active':''}" onclick="setPF('payment','upfront')">💳 Upfront</div>
+    <div class="fpill${pFilter.payment==='partner'?' active':''}" onclick="setPF('payment','partner')">🤝 Partner</div>
+  </div>
+  <div id="plist"></div>`;
+  buildPList();
+}
+function onSearch(){
+  const q=document.getElementById('psearch')?.value||'';
+  pFilter.q=q.toLowerCase();
+  document.getElementById('search-clear').style.display=q?'block':'none';
+  if(q.length>=2){showSearchResult(q);}
+  else{document.getElementById('search-result-area').innerHTML='';}
+  buildPList();
+}
+function clearSearch(){document.getElementById('psearch').value='';pFilter.q='';document.getElementById('search-clear').style.display='none';document.getElementById('search-result-area').innerHTML='';buildPList();}
+function showSearchResult(q){
+  const ql=q.toLowerCase();
+  const p=S.parcels.find(x=>x.id.toLowerCase()===ql||x.trackCode?.toLowerCase()===ql||(x.id.toLowerCase().includes(ql))||(x.trackCode?.toLowerCase().includes(ql)));
+  const el=document.getElementById('search-result-area');
+  if(!p){el.innerHTML='';return;}
+  const steps=[
+    {s:'pending',label:'Parcel Recorded',time:p.recordedAt},
+    {s:'dispatched',label:'Dispatched from Nairobi',time:p.dispatchedAt},
+    {s:'intransit',label:'In Transit',time:p.intransitAt},
+    {s:'delivered',label:'Issued at Mandera Office',time:p.deliveredAt},
+  ];
+  const order=['pending','dispatched','intransit','delivered'];
+  const cur=order.indexOf(p.status);
+  el.innerHTML=`<div class="search-result-card">
+    <div class="sr-title">🔍 Parcel Found — ${p.id}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div><div style="font-size:15px;font-weight:700">${p.sender} → ${p.receiver}</div><div style="font-size:13px;color:var(--t2)">${p.description}</div></div>
+      <div>${sbadge(p.status)}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      ${badge(p.payment,p.partner)}<span style="font-size:12px;color:var(--teal);font-weight:700">🔑 ${p.trackCode}</span>
+    </div>
+    <div class="track-timeline">
+      ${steps.map((step,i)=>{
+        const done=order.indexOf(p.status)>=i;
+        const active=order.indexOf(p.status)===i;
+        return`<div class="track-step">
+          <div class="track-dot${done?' done':''}${active?' active':''}">${done?'✓':i+1}</div>
+          <div class="track-info"><div class="tl" style="${done?'color:var(--green)':'color:var(--t3)'}">${step.label}</div>
+          <div class="ts">${step.time?new Date(step.time).toLocaleString('en-KE'):done?'Completed':'Pending'}</div>
+          ${step.s==='delivered'&&p.issuedTo?`<div class="ts">Collected by: <strong>${p.issuedTo}</strong> (ID: ${p.issuedId||'—'})</div>`:''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+function setPF(key,val){
+  if(key===''){pFilter={status:'',payment:'',q:pFilter.q};}
+  else if(pFilter[key]===val){pFilter[key]='';}
+  else{pFilter[key]=val;}
+  renderParcels();
+}
+function buildPList(){
+  const el=document.getElementById('plist');if(!el)return;
+  const canEd=can('edit');const q=pFilter.q;
+  let p=S.parcels.filter(x=>{
+    const ms=pFilter.status?x.status===pFilter.status:true;
+    const mp=pFilter.payment?x.payment===pFilter.payment:true;
+    const mq=q?[x.id,x.trackCode,x.sender,x.receiver,x.description].some(f=>(f||'').toLowerCase().includes(q)):true;
+    return ms&&mp&&mq;
+  });
+  if(!p.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div>No parcels found.</div>';return;}
+  el.innerHTML=p.map(x=>`<div class="pcard">
+    <div class="pcard-top">
+      <div><span class="pcard-id">${x.id}${x.editLog?.length?'<span class="edited-dot"></span>':''}</span><br><span style="font-size:12px;color:var(--t3)">${x.date}</span></div>
+      <div style="text-align:right"><div class="pcard-cost">${fmtKES(x.cost)}</div><div style="font-size:11px;color:var(--t3)">Goods: ${fmtKES(x.goodsValue)}</div></div>
+    </div>
+    <div class="pcard-route">${x.sender} → ${x.receiver}</div>
+    <div class="pcard-desc">${x.description}${x.receiverPhone?' · 📱 '+x.receiverPhone:''}</div>
+    <div class="pcard-meta">${badge(x.payment,x.partner)}${tlabel(x.term,x.customTerm)}${sbadge(x.status)}</div>
+    <div class="pcard-bottom">
+      <span style="font-size:12px;color:var(--teal);font-weight:600">🔑 ${x.trackCode||'—'}</span>
+      ${canEd?`<button class="btn btn-w btn-sm" onclick="openEdit('${x.id}')">✏️ Edit</button>`:''}
+    </div>
+    ${x.vehicle?`<div style="font-size:12px;color:var(--t3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">🚛 ${x.vehicle}</div>`:''}
+  </div>`).join('');
+}
+
+/* ══ DISPATCH ══ */
+let selectedParcels=new Set();
+function renderDispatch(){
+  selectedParcels=new Set();
+  const el=document.getElementById('tab-dispatch');
+  const pending=S.parcels.filter(x=>x.status==='pending');
+  el.innerHTML=rbanner()+`<div class="pg-title">🚛 Dispatch Parcels</div>
+  <div class="card" style="background:var(--obg);border-color:#fed7aa">
+    <div style="font-size:13px;color:var(--orange);line-height:1.6"><strong>How to dispatch:</strong><br>1. Tap parcels to select them &nbsp;2. Choose the vehicle &nbsp;3. Tap Dispatch → status becomes Dispatched</div>
+  </div>
+  ${pending.length===0?`<div class="empty"><div class="empty-icon">✅</div>No pending parcels to dispatch!</div>`:`
+  <div id="dispatch-list">${pending.map(x=>`
+  <div class="pcard" id="dpc-${x.id}" onclick="toggleSelect('${x.id}')">
+    <div class="pcard-top">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div class="pcard-check" id="chk-${x.id}"></div>
+        <div><span class="pcard-id">${x.id}</span><br><span style="font-size:12px;color:var(--t3)">${x.date}</span></div>
+      </div>
+      <div style="text-align:right"><div class="pcard-cost">${fmtKES(x.cost)}</div><div style="font-size:11px;color:var(--t3)">Goods: ${fmtKES(x.goodsValue)}</div></div>
+    </div>
+    <div class="pcard-route">${x.sender} → ${x.receiver}</div>
+    <div class="pcard-desc">${x.description}</div>
+    <div class="pcard-meta">${badge(x.payment,x.partner)}${tlabel(x.term,x.customTerm)}</div>
+    <div style="font-size:12px;color:var(--teal);font-weight:600;margin-top:6px">🔑 ${x.trackCode||'—'} · 📍 ${x.address||'Mandera'}</div>
+  </div>`).join('')}</div>
+  <div class="dispatch-bar" id="dispatch-bar">
+    <span style="font-size:13px;font-weight:600;white-space:nowrap" id="dispatch-count">0 selected</span>
+    <select id="dispatch-vehicle"><option value="">— Select Vehicle —</option>${S.vehicles.map(v=>`<option value="${v.id}">${v.id} · ${v.driver}</option>`).join('')}</select>
+    <button class="dispatch-btn" onclick="doDispatch()">🚛 Dispatch</button>
+  </div>`}`;
+}
+function toggleSelect(id){
+  if(selectedParcels.has(id))selectedParcels.delete(id);else selectedParcels.add(id);
+  document.getElementById('dpc-'+id)?.classList.toggle('selected',selectedParcels.has(id));
+  const chk=document.getElementById('chk-'+id);
+  if(chk){chk.classList.toggle('checked',selectedParcels.has(id));chk.textContent=selectedParcels.has(id)?'✓':'';}
+  const bar=document.getElementById('dispatch-bar');
+  if(bar)bar.classList.toggle('show',selectedParcels.size>0);
+  const cnt=document.getElementById('dispatch-count');
+  if(cnt)cnt.textContent=selectedParcels.size+' selected';
+}
+function doDispatch(){
+  const veh=document.getElementById('dispatch-vehicle').value;
+  if(!veh){toast('⚠ Please select a vehicle');return;}
+  if(selectedParcels.size===0){toast('⚠ No parcels selected');return;}
+  let count=0;
+  selectedParcels.forEach(id=>{const p=S.parcels.find(x=>x.id===id);if(p&&p.status==='pending'){p.status='dispatched';p.vehicle=veh;p.dispatchedAt=new Date().toISOString();count++;}});
+  saveD();toast('✓ '+count+' parcel(s) dispatched on '+veh);selectedParcels=new Set();renderDispatch();
+}
+
+/* ══ ISSUE PARCEL ══ */
+function renderIssue(){
+  const el=document.getElementById('tab-issue');
+  el.innerHTML=rbanner()+`<div class="pg-title">✅ Issue Parcel — Mandera Office</div>
+  <div class="receive-box">
+    <div class="receive-icon">📬</div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:6px">Enter Tracking Code</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:16px">Key in the unique code sent to the recipient's phone</div>
+    <input class="code-input" id="recv-code" placeholder="e.g. HAD001" maxlength="8" oninput="lookupParcel()" autocomplete="off" autocapitalize="characters">
+    <div id="recv-result"></div>
+  </div>
+  <div class="card">
+    <div class="ct">📋 Recently Issued Parcels</div>
+    ${S.parcels.filter(x=>x.status==='delivered'&&x.deliveredAt).slice(0,8).map(x=>`
+    <div class="vrow">
+      <div><div class="vrow-id">${x.trackCode} · ${x.id}</div><div class="vrow-name">${x.receiver}</div>
+      <div class="vrow-desc">${x.description} · Issued to: ${x.issuedTo||x.receiver} · ${x.deliveredAt?new Date(x.deliveredAt).toLocaleDateString('en-KE'):''}</div></div>
+      <span class="badge b-delivered" style="flex-shrink:0;align-self:flex-start">✓ Issued</span>
+    </div>`).join('')||'<div style="color:var(--t3);font-size:13px;padding:10px 0">No issuances yet</div>'}
+  </div>`;
+}
+function lookupParcel(){
+  const code=document.getElementById('recv-code').value.trim().toUpperCase();
+  const el=document.getElementById('recv-result');
+  if(code.length<3){el.innerHTML='';return;}
+  const p=S.parcels.find(x=>(x.trackCode||'').toUpperCase()===code||(x.id||'').toUpperCase()===code);
+  if(!p){el.innerHTML=`<div style="background:var(--rbg);border:1px solid #fca5a5;border-radius:var(--rs);padding:14px;margin-top:14px;text-align:center;color:var(--red);font-weight:600">❌ No parcel found with code "${code}"</div>`;return;}
+  if(p.status==='delivered'){el.innerHTML=`<div class="found-parcel" style="background:var(--s2);border-color:var(--border)"><div class="fp-title" style="color:var(--t2)">ℹ️ Already Issued</div><div class="fp-row"><span>Parcel</span><strong>${p.id}</strong></div><div class="fp-row"><span>Collected by</span><strong>${p.issuedTo||p.receiver}</strong></div><div class="fp-row"><span>ID Number</span><strong>${p.issuedId||'—'}</strong></div><div class="fp-row"><span>Issued on</span><strong>${p.deliveredAt?new Date(p.deliveredAt).toLocaleString('en-KE'):'-'}</strong></div></div>`;return;}
+  if(p.status==='pending'){el.innerHTML=`<div style="background:var(--abg);border:1px solid #fcd34d;border-radius:var(--rs);padding:14px;margin-top:14px;color:var(--amber);font-weight:600;text-align:center">⏳ Parcel ${p.id} has not been dispatched yet</div>`;return;}
+  const payNote=p.payment==='cash'?'<div style="background:var(--rbg);border:1px solid #fca5a5;border-radius:6px;padding:10px;margin-top:8px;color:var(--red);font-weight:600;text-align:center">💰 COLLECT CASH PAYMENT before issuing!</div>':'';
+  el.innerHTML=`<div class="found-parcel">
+    <div class="fp-title">✅ Parcel Found — Ready to Issue</div>
+    <div class="fp-row"><span>Parcel ID</span><strong>${p.id}</strong></div>
+    <div class="fp-row"><span>Receiver</span><strong>${p.receiver}</strong></div>
+    <div class="fp-row"><span>Phone</span><strong>${p.receiverPhone}</strong></div>
+    <div class="fp-row"><span>Description</span><strong>${p.description}</strong></div>
+    <div class="fp-row"><span>Goods Value</span><strong>${fmtKES(p.goodsValue)}</strong></div>
+    <div class="fp-row"><span>Delivery Cost</span><strong>${fmtKES(p.cost)}</strong></div>
+    <div class="fp-row"><span>Payment</span><strong>${badge(p.payment,p.partner)}</strong></div>
+    <div class="fp-row"><span>Address</span><strong>${p.address}</strong></div>
+    ${p.notes?`<div class="fp-row"><span>Notes</span><strong>${p.notes}</strong></div>`:''}
+    ${payNote}
+  </div>
+  <div class="card" style="margin-top:14px;border-color:var(--accent)">
+    <div class="ct" style="color:var(--accent)">📝 Collector Details</div>
+    <div class="field"><label>Full Name of Person Collecting</label><input id="issue-name" placeholder="Full name of collector" value="${p.receiver}"></div>
+    <div class="field"><label>ID Number / Passport</label><input id="issue-id" placeholder="National ID or Passport number" inputmode="numeric"></div>
+  </div>
+  <button class="btn btn-p btn-full" onclick="issueParcel('${p.id}')">✅ Issue Parcel to Collector</button>`;
+}
+function issueParcel(id){
+  const p=S.parcels.find(x=>x.id===id);if(!p)return;
+  const name=document.getElementById('issue-name')?.value?.trim();
+  const idNum=document.getElementById('issue-id')?.value?.trim();
+  if(!name){toast('⚠ Please enter collector name');return;}
+  if(!idNum){toast('⚠ Please enter collector ID number');return;}
+  p.status='delivered';p.deliveredAt=new Date().toISOString();p.issuedTo=name;p.issuedId=idNum;
+  const msg=`Dear ${p.receiver}, your parcel (${p.trackCode}) from ${p.sender} has been issued at the Mandera office to ${name} (ID: ${idNum}). Thank you for using NMD Deliveries.`;
+  sendSMS(p.receiverPhone,msg,'delivery:'+id);saveD();
+  document.getElementById('recv-code').value='';
+  document.getElementById('recv-result').innerHTML=`<div style="background:var(--gbg);border:1px solid #b7e4c7;border-radius:var(--r);padding:20px;text-align:center;margin-top:14px">
+    <div style="font-size:32px;margin-bottom:8px">✅</div>
+    <div style="font-size:16px;font-weight:700;color:var(--green)">Parcel Issued Successfully!</div>
+    <div style="font-size:13px;color:var(--t2);margin-top:6px">Issued to <strong>${name}</strong> (ID: ${idNum})</div>
+    <div class="sms-sent" style="margin-top:12px;justify-content:center">📱 Confirmation SMS sent to ${p.receiverPhone}</div>
+    <div class="sms-preview">"${msg}"</div>
+  </div>`;
+  toast('✓ Parcel '+id+' issued to '+name);
+}
+
+/* ══ EDIT DRAWER ══ */
+function etogglePart(){const v=document.getElementById('epay').value;document.getElementById('epf').style.display=v==='partner'?'block':'none';}
+function etogCT(){const v=document.getElementById('eterm')?.value,c=document.getElementById('ectf');if(c)c.style.display=v==='custom'?'block':'none';}
+function openEdit(id){
+  const p=S.parcels.find(x=>x.id===id);if(!p)return;
+  document.getElementById('epid').textContent='#'+p.id;
+  document.getElementById('drw-edit').dataset.pid=id;
+  document.getElementById('es').value=p.sender||'';document.getElementById('esp').value=p.senderPhone||'';
+  document.getElementById('er').value=p.receiver||'';document.getElementById('erp').value=p.receiverPhone||'';
+  document.getElementById('eaddr').value=p.address||'';document.getElementById('edesc').value=p.description||'';
+  document.getElementById('ewt').value=p.goodsValue||'';document.getElementById('ecost').value=p.cost||'';
+  document.getElementById('estat').value=p.status||'pending';document.getElementById('epay').value=p.payment||'cash';
+  document.getElementById('epart').value=p.partner||'AMKA';
+  document.getElementById('eveh').innerHTML='<option value="">— None —</option>'+S.vehicles.map(v=>`<option value="${v.id}" ${p.vehicle===v.id?'selected':''}>${v.id} — ${v.driver}</option>`).join('');
+  document.getElementById('eterm').value=p.term||'3days';
+  document.getElementById('ect').value=p.customTerm||'';
+  document.getElementById('ectf').style.display=p.term==='custom'?'block':'none';
+  document.getElementById('enotes').value=p.notes||'';
+  document.getElementById('ereason').value='';
+  document.getElementById('epf').style.display=p.payment==='partner'?'block':'none';
+  openD('drw-edit');
+}
+function saveEdit(){
+  const id=document.getElementById('drw-edit').dataset.pid;
+  const reason=document.getElementById('ereason').value.trim();
+  if(!reason){toast('⚠ Please provide a reason for the edit');return;}
+  const p=S.parcels.find(x=>x.id===id);if(!p)return;
+  p.editLog=p.editLog||[];
+  p.editLog.push({by:sess.user.name,at:new Date().toISOString(),reason});
+  p.sender=document.getElementById('es').value.trim();p.senderPhone=document.getElementById('esp').value.trim();
+  p.receiver=document.getElementById('er').value.trim();p.receiverPhone=document.getElementById('erp').value.trim();
+  p.address=document.getElementById('eaddr').value.trim();p.description=document.getElementById('edesc').value.trim();
+  p.goodsValue=parseFloat(document.getElementById('ewt').value)||0;p.cost=parseFloat(document.getElementById('ecost').value)||0;
+  p.status=document.getElementById('estat').value;p.vehicle=document.getElementById('eveh').value||null;
+  p.payment=document.getElementById('epay').value;
+  p.partner=p.payment==='partner'?document.getElementById('epart').value:null;
+  const t=p.payment==='partner'?document.getElementById('eterm').value:null;
+  p.term=t;p.customTerm=t==='custom'?document.getElementById('ect').value.trim():null;
+  p.notes=document.getElementById('enotes').value.trim();
+  saveD();closeD('drw-edit');toast('✓ Parcel '+id+' updated');buildPList();
+}
+
+/* ══ REPORTS ══ */
+let rDateFrom='',rDateTo='',rPeriod='all';
+function renderReports(){
+  const el=document.getElementById('tab-reports');
+  el.innerHTML=rbanner()+'<div class="pg-title">📊 Reports</div><div id="report-shell"></div>';
+  buildReportShell();
+}
+function setToday(){const d=new Date().toISOString().slice(0,10);return d;}
+function buildReportShell(){
+  const today=setToday();
+  const el=document.getElementById('report-shell');if(!el)return;
+  const periods=[{v:'all',l:'All Time'},{v:'today',l:'Today'},{v:'7',l:'Last 7 Days'},{v:'30',l:'Last 30 Days'},{v:'90',l:'Last 90 Days'},{v:'custom',l:'Custom'}];
+  el.innerHTML=`<div class="date-range-bar">
+    <div class="dr-title">📅 Select Period</div>
+    <div class="period-pills">${periods.map(p=>`<div class="ppill${rPeriod===p.v?' active':''}" onclick="setPeriod('${p.v}')">${p.l}</div>`).join('')}</div>
+    <div class="date-inputs" id="custom-dates" style="${rPeriod==='custom'?'':'display:none'}">
+      <div><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">From</label><input type="date" id="rdate-from" value="${rDateFrom||'2025-04-01'}" onchange="applyDateRange()"></div>
+      <div><label style="font-size:11px;font-weight:700;color:var(--t2);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">To</label><input type="date" id="rdate-to" value="${rDateTo||today}" onchange="applyDateRange()"></div>
+    </div>
+  </div>
+  <div id="rc"></div>`;
+  buildReports();
+}
+function setPeriod(v){
+  rPeriod=v;
+  const today=new Date();
+  if(v==='today'){rDateFrom=rDateTo=today.toISOString().slice(0,10);}
+  else if(v==='7'){const d=new Date(today);d.setDate(d.getDate()-7);rDateFrom=d.toISOString().slice(0,10);rDateTo=today.toISOString().slice(0,10);}
+  else if(v==='30'){const d=new Date(today);d.setDate(d.getDate()-30);rDateFrom=d.toISOString().slice(0,10);rDateTo=today.toISOString().slice(0,10);}
+  else if(v==='90'){const d=new Date(today);d.setDate(d.getDate()-90);rDateFrom=d.toISOString().slice(0,10);rDateTo=today.toISOString().slice(0,10);}
+  else if(v==='all'){rDateFrom='';rDateTo='';}
+  buildReportShell();
+}
+function applyDateRange(){
+  rDateFrom=document.getElementById('rdate-from')?.value||'';
+  rDateTo=document.getElementById('rdate-to')?.value||'';
+  buildReports();
+}
+function filterByDate(parcels){
+  if(!rDateFrom&&!rDateTo)return parcels;
+  return parcels.filter(p=>{
+    if(rDateFrom&&p.date<rDateFrom)return false;
+    if(rDateTo&&p.date>rDateTo)return false;
+    return true;
+  });
+}
+function buildReports(){
+  const allP=filterByDate(S.parcels);
+  const cash=allP.filter(x=>x.payment==='cash'),up=allP.filter(x=>x.payment==='upfront');
+  const amka=allP.filter(x=>x.partner==='AMKA'),kidba=allP.filter(x=>x.partner==='KIDBA'),matta=allP.filter(x=>x.partner==='MATTA');
+  const sumC=a=>a.reduce((s,b)=>s+b.cost,0);
+  const tot=sumC(allP),cr=sumC(cash),ur=sumC(up),ar=sumC(amka),kr=sumC(kidba),mr=sumC(matta),pr=ar+kr+mr;
+  function pct(a,b){return b?Math.round(a/b*100):0;}
+  const pending=allP.filter(x=>x.status==='pending').length,dispatched=allP.filter(x=>x.status==='dispatched').length,intransit=allP.filter(x=>x.status==='intransit').length,delivered=allP.filter(x=>x.status==='delivered').length;
+  function miniCards(rows){
+    if(!rows.length)return'<div class="empty" style="padding:20px"><div class="empty-icon">📭</div>No records in this period</div>';
+    return rows.slice(0,20).map(x=>`<div class="pcard">
+      <div class="pcard-top"><div><span class="pcard-id">${x.id}</span><br><span style="font-size:12px;color:var(--t3)">${x.date}</span></div>
+      <div style="text-align:right"><div class="pcard-cost">${fmtKES(x.cost)}</div><div style="font-size:11px;color:var(--t3)">${fmtKES(x.goodsValue)}</div></div></div>
+      <div class="pcard-route">${x.sender} → ${x.receiver}</div>
+      <div class="pcard-desc">${x.description} · 🔑 ${x.trackCode||'—'}</div>
+      <div class="pcard-meta">${sbadge(x.status)}</div>
+    </div>`).join('')+(rows.length>20?`<div style="text-align:center;padding:10px;color:var(--t3);font-size:13px">+${rows.length-20} more parcels</div>`:'');
+  }
+  const rc=document.getElementById('rc');if(!rc)return;
+
+  // Build pie data
+  const payPie=[
+    {label:'Cash on Delivery',val:cr,color:'#2d6a4f',bg:'#d8f3dc',items:cash},
+    {label:'Upfront',val:ur,color:'#1a4b7a',bg:'#dbeafe',items:up},
+    {label:'AMKA',val:ar,color:'#4c1d95',bg:'#ede9fe',items:amka},
+    {label:'KIDBA',val:kr,color:'#7c4d00',bg:'#fef3c7',items:kidba},
+    {label:'MATTA',val:mr,color:'#7c2d12',bg:'#fee2e2',items:matta},
+  ].filter(x=>x.val>0);
+  const statusPie=[
+    {label:'Pending',val:pending,color:'#7c4d00',bg:'#fef3c7',items:allP.filter(x=>x.status==='pending')},
+    {label:'Dispatched',val:dispatched,color:'#9a3412',bg:'#ffedd5',items:allP.filter(x=>x.status==='dispatched')},
+    {label:'In Transit',val:intransit,color:'#312e81',bg:'#e0e7ff',items:allP.filter(x=>x.status==='intransit')},
+    {label:'Delivered',val:delivered,color:'#2d6a4f',bg:'#d8f3dc',items:allP.filter(x=>x.status==='delivered')},
+  ].filter(x=>x.val>0);
+
+  rc.innerHTML=`
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn-print" style="flex:1" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-s btn-sm" onclick="exportCSV()">⬇️ CSV</button>
+  </div>
+  <div class="metrics">
+    <div class="metric blue"><div class="ml">Total Parcels</div><div class="mv">${allP.length}</div></div>
+    <div class="metric green"><div class="ml">Total Revenue</div><div class="mv" style="font-size:16px">${fmtKES(tot)}</div></div>
+    <div class="metric indigo"><div class="ml">In Transit</div><div class="mv">${intransit}</div></div>
+    <div class="metric"><div class="ml">Delivered</div><div class="mv">${delivered}</div></div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="ml">Pending</div><div class="mv">${pending}</div></div>
+    <div class="metric orange"><div class="ml">Dispatched</div><div class="mv">${dispatched}</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">📊 Revenue by Payment Method</div>
+    ${allP.length?`<div class="pie-wrap"><canvas class="pie-canvas" id="pie-pay" width="200" height="200"></canvas><div class="pie-legend" id="pie-pay-legend"></div></div><div class="pie-detail-panel" id="pie-pay-detail"></div>`:'<div class="empty" style="padding:20px">No data</div>'}
+  </div>
+
+  <div class="card">
+    <div class="ct">📊 Parcels by Status</div>
+    ${allP.length?`<div class="pie-wrap"><canvas class="pie-canvas" id="pie-status" width="200" height="200"></canvas><div class="pie-legend" id="pie-status-legend"></div></div><div class="pie-detail-panel" id="pie-status-detail"></div>`:'<div class="empty" style="padding:20px">No data</div>'}
+  </div>
+
+  <div class="card"><div class="ct">💵 Cash on Delivery</div>
+    <div class="rsum"><div class="rsumg"><div class="rhl">Parcels</div><div class="rhv">${cash.length}</div></div><div class="rsumg"><div class="rhl">Revenue</div><div class="rhv" style="color:var(--green)">${fmtKES(cr)}</div></div><div class="rsumg"><div class="rhl">% of Total</div><div class="rhv">${pct(cr,tot)}%</div></div></div>${miniCards(cash)}</div>
+  <div class="card"><div class="ct">💳 Upfront Payment</div>
+    <div class="rsum"><div class="rsumg"><div class="rhl">Parcels</div><div class="rhv">${up.length}</div></div><div class="rsumg"><div class="rhl">Revenue</div><div class="rhv" style="color:var(--blue)">${fmtKES(ur)}</div></div><div class="rsumg"><div class="rhl">% of Total</div><div class="rhv">${pct(ur,tot)}%</div></div></div>${miniCards(up)}</div>
+  <div class="card"><div class="ct">🤝 Partner Payments</div>
+    <div class="rsum"><div class="rsumg"><div class="rhl">Parcels</div><div class="rhv">${amka.length+kidba.length+matta.length}</div></div><div class="rsumg"><div class="rhl">Revenue</div><div class="rhv" style="color:var(--purple)">${fmtKES(pr)}</div></div><div class="rsumg"><div class="rhl">% of Total</div><div class="rhv">${pct(pr,tot)}%</div></div></div>
+    <div class="metrics" style="grid-template-columns:1fr 1fr 1fr;margin:12px 0 6px">
+      <div class="metric"><div class="ml">AMKA</div><div class="mv" style="font-size:13px;color:var(--purple)">${fmtKES(ar)}</div><div class="ms">${amka.length} parcels</div></div>
+      <div class="metric"><div class="ml">KIDBA</div><div class="mv" style="font-size:13px;color:var(--amber)">${fmtKES(kr)}</div><div class="ms">${kidba.length} parcels</div></div>
+      <div class="metric"><div class="ml">MATTA</div><div class="mv" style="font-size:13px;color:var(--coral)">${fmtKES(mr)}</div><div class="ms">${matta.length} parcels</div></div>
+    </div>
+    ${['AMKA','KIDBA','MATTA'].map(n=>{const rows=allP.filter(x=>x.partner===n);return`<div style="margin-top:12px"><div class="ct">${n} — ${rows.length} Parcels · ${fmtKES(sumC(rows))}</div>${miniCards(rows)}</div>`;}).join('')}
+  </div>`;
+
+  // Draw pies after DOM update
+  setTimeout(()=>{
+    if(allP.length){
+      drawPie('pie-pay','pie-pay-legend','pie-pay-detail',payPie,tot,'Revenue');
+      drawPie('pie-status','pie-status-legend','pie-status-detail',statusPie,allP.length,'Parcels');
+    }
+  },50);
+}
+function drawPie(canvasId,legendId,detailId,data,total,unit){
+  const canvas=document.getElementById(canvasId);const legendEl=document.getElementById(legendId);
+  if(!canvas||!legendEl)return;
+  const ctx=canvas.getContext('2d');
+  const W=200,H=200,cx=W/2,cy=H/2,R=80,IR=44;
+  ctx.clearRect(0,0,W,H);
+  let startAngle=-Math.PI/2;
+  const slices=data.map(d=>{const angle=(d.val/total)*2*Math.PI;const s={...d,startAngle,endAngle:startAngle+angle};startAngle+=angle;return s;});
+  function drawSlices(highlight=-1){
+    ctx.clearRect(0,0,W,H);
+    slices.forEach((s,i)=>{
+      const exp=highlight===i?8:0;
+      const mid=(s.startAngle+s.endAngle)/2;
+      const ox=Math.cos(mid)*exp,oy=Math.sin(mid)*exp;
+      ctx.beginPath();ctx.moveTo(cx+ox,cy+oy);ctx.arc(cx+ox,cy+oy,R,s.startAngle,s.endAngle);ctx.closePath();
+      ctx.fillStyle=s.color;ctx.fill();
+      ctx.strokeStyle='white';ctx.lineWidth=2;ctx.stroke();
+      // Donut hole
+      ctx.beginPath();ctx.arc(cx,cy,IR,0,2*Math.PI);ctx.fillStyle='white';ctx.fill();
+    });
+    // Center label
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 13px DM Sans';ctx.fillStyle='#1a1917';
+    ctx.fillText(data.length+' types',cx,cy-7);
+    ctx.font='11px DM Sans';ctx.fillStyle='#6b6a64';
+    ctx.fillText(unit,cx,cy+9);
+  }
+  drawSlices();
+  // Legend
+  legendEl.innerHTML=slices.map((s,i)=>`
+    <div class="pie-legend-item" id="pli-${canvasId}-${i}" onclick="pieClick('${canvasId}','${legendId}','${detailId}',${i})" style="border-left:3px solid ${s.color}">
+      <div class="pie-dot" style="background:${s.color}"></div>
+      <span class="pie-legend-label">${s.label}</span>
+      <span class="pie-legend-val">${unit==='Revenue'?fmtKES(s.val):s.val}</span>
+      <span class="pie-legend-pct">${Math.round(s.val/total*100)}%</span>
+    </div>`).join('');
+  // Canvas click
+  canvas.onclick=function(e){
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width,scaleY=canvas.height/rect.height;
+    const mx=(e.clientX-rect.left)*scaleX-cx,my=(e.clientY-rect.top)*scaleY-cy;
+    const dist=Math.sqrt(mx*mx+my*my);
+    if(dist<IR||dist>R+10)return;
+    let angle=Math.atan2(my,mx);if(angle<-Math.PI/2)angle+=2*Math.PI;
+    const hit=slices.findIndex(s=>angle>=s.startAngle&&angle<s.endAngle);
+    if(hit>=0)pieClick(canvasId,legendId,detailId,hit,slices,drawSlices);
+  };
+  canvas._slices=slices;canvas._drawSlices=drawSlices;
+}
+let pieActive={};
+function pieClick(canvasId,legendId,detailId,idx,slicesArg,drawFnArg){
+  const canvas=document.getElementById(canvasId);
+  const slices=slicesArg||canvas?._slices;
+  const drawFn=drawFnArg||canvas?._drawSlices;
+  const detailEl=document.getElementById(detailId);
+  const same=pieActive[canvasId]===idx;
+  pieActive[canvasId]=same?-1:idx;
+  if(drawFn)drawFn(same?-1:idx);
+  // Highlight legend
+  document.querySelectorAll(`[id^="pli-${canvasId}-"]`).forEach((el,i)=>el.classList.toggle('hl',!same&&i===idx));
+  if(!detailEl||!slices)return;
+  if(same){detailEl.classList.remove('show');return;}
+  const s=slices[idx];
+  const sumC2=a=>a.reduce((t,b)=>t+b.cost,0);
+  detailEl.classList.add('show');
+  detailEl.innerHTML=`<div class="pie-detail-title"><div class="pie-dot" style="background:${s.color};width:14px;height:14px"></div>${s.label} — ${s.items?.length||0} Parcels</div>
+  ${(s.items||[]).slice(0,10).map(x=>`<div class="vrow">
+    <div><div class="vrow-id">${x.id} · ${x.date}</div><div class="vrow-name">${x.sender} → ${x.receiver}</div><div class="vrow-desc">${x.description}</div></div>
+    <div class="vrow-right"><div class="vrow-cost">${fmtKES(x.cost)}</div><div class="vrow-badges">${sbadge(x.status)}</div></div>
+  </div>`).join('')}
+  ${(s.items||[]).length>10?`<div style="text-align:center;padding:8px;color:var(--t3);font-size:13px">+${s.items.length-10} more</div>`:''}
+  <div style="padding-top:8px;border-top:1px solid var(--border);font-weight:700;font-size:13px;display:flex;justify-content:space-between"><span>Total</span><span>${fmtKES(sumC2(s.items||[]))}</span></div>`;
+}
+
+/* ══ VEHICLES ══ */
+function renderVehicles(){
+  const el=document.getElementById('tab-vehicles'),p=S.parcels;
+  el.innerHTML=rbanner()+`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <div class="pg-title">🏎️ Vehicle Fleet</div>
+    ${can('admin')?'<button class="btn btn-s btn-sm" onclick="openD(\'drw-veh\')">+ Add</button>':''}
+  </div>
+  ${S.vehicles.map(v=>{
+    const vp=p.filter(x=>x.vehicle===v.id),rev=vp.reduce((a,b)=>a+b.cost,0);
+    const del=vp.filter(x=>x.status==='delivered').length,disp=vp.filter(x=>x.status==='dispatched').length,tr=vp.filter(x=>x.status==='intransit').length;
+    return`<div class="vcard"><div class="vcard-hdr">
+      <div><div class="vplate">${v.id}</div><div style="font-size:12px;color:var(--t3);margin-top:4px">${v.type} · ${v.driver}</div></div>
+      <div style="text-align:right"><div class="vrev-amt">${fmtKES(rev)}</div><div class="vrev-sub">${vp.length} parcels</div></div>
+    </div>
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px">
+      <div class="metric"><div class="ml">Total</div><div class="mv" style="font-size:18px">${vp.length}</div></div>
+      <div class="metric orange"><div class="ml">Dispatched</div><div class="mv" style="font-size:18px">${disp}</div></div>
+      <div class="metric indigo"><div class="ml">Transit</div><div class="mv" style="font-size:18px">${tr}</div></div>
+      <div class="metric green"><div class="ml">Done</div><div class="mv" style="font-size:18px">${del}</div></div>
+    </div>
+    ${vp.length?vp.map(x=>`<div class="vrow">
+      <div><div class="vrow-id">${x.id} · ${x.date}</div><div class="vrow-name">${x.sender} → ${x.receiver}</div><div class="vrow-desc">${x.description}</div></div>
+      <div class="vrow-right"><div class="vrow-cost">${fmtKES(x.cost)}</div><div class="vrow-badges">${badge(x.payment,x.partner)}${sbadge(x.status)}</div></div>
+    </div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:700;font-size:13px;border-top:2px solid var(--border);margin-top:4px"><span>TOTAL</span><span>${fmtKES(rev)}</span></div>`
+    :'<div class="empty" style="padding:20px">No parcels assigned yet</div>'}
+    </div>`;
+  }).join('')}`;
+}
+function addVehicle(){
+  const pl=document.getElementById('mvp').value.trim(),dr=document.getElementById('mvd').value.trim(),ty=document.getElementById('mvt').value,ca=parseInt(document.getElementById('mvc').value)||500;
+  if(!pl||!dr){toast('⚠ Plate and driver required');return;}
+  if(S.vehicles.find(v=>v.id===pl)){toast('⚠ Vehicle already exists');return;}
+  S.vehicles.push({id:pl,driver:dr,type:ty,capacity:ca});saveD();closeD('drw-veh');renderVehicles();toast('✓ Vehicle '+pl+' added');
+}
+
+/* ══ ADMIN ══ */
+function renderAdmin(){
+  const el=document.getElementById('tab-admin');
+  const smsLog=S.smsLog||[];
+  el.innerHTML=rbanner()+`
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="ct" style="margin:0;padding:0;border:none">🛡️ System Users</div><button class="btn btn-p btn-sm" onclick="openD('drw-user')">+ Add User</button></div>
+    ${users.map(u=>`<div class="urow"><div><div class="urow-name">${u.name}</div><div class="urow-un">${u.username} · <span class="rchip ${RC[u.role]}">${RI[u.role]} ${RL[u.role]}</span></div></div>${u.username!=='admin'?`<button class="btn btn-d btn-sm" onclick="delUser('${u.id}')">Remove</button>`:'<span style="font-size:11px;color:var(--t3)">🔒</span>'}</div>`).join('')}
+  </div>
+  <div class="card"><div class="ct">⚙️ Role Permissions</div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr><th style="text-align:left;padding:8px;background:var(--s2);border-bottom:1px solid var(--border)">Module</th><th style="padding:8px;background:var(--s2);border-bottom:1px solid var(--border);text-align:center">👷</th><th style="padding:8px;background:var(--s2);border-bottom:1px solid var(--border);text-align:center">🗂</th><th style="padding:8px;background:var(--s2);border-bottom:1px solid var(--border);text-align:center">🛡</th></tr></thead>
+      <tbody>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Parcel Intake</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">—</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">All Parcels</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">View</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">View+Edit</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">Full</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Dispatch</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Issue Parcel</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Reports</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">—</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
+        <tr><td style="padding:8px">Admin</td><td style="text-align:center;padding:8px">—</td><td style="text-align:center;padding:8px">—</td><td style="text-align:center;padding:8px">✅</td></tr>
+      </tbody></table></div>
+  </div>
+  <div class="card"><div class="ct">🗂️ Edit Audit Log</div>
+    ${S.parcels.filter(x=>x.editLog?.length).length===0?'<div style="color:var(--t3);font-size:13px;padding:8px 0">No edits recorded yet</div>':
+    S.parcels.filter(x=>x.editLog?.length).flatMap(x=>x.editLog.map(e=>({pid:x.id,...e}))).sort((a,b)=>b.at.localeCompare(a.at)).map(e=>`<div class="vrow"><div><div class="vrow-id">${e.pid}</div><div class="vrow-name">${e.by}</div><div class="vrow-desc">${e.reason}</div></div><div style="font-size:11px;color:var(--t3);text-align:right;flex-shrink:0">${new Date(e.at).toLocaleDateString('en-KE')}<br>${new Date(e.at).toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})}</div></div>`).join('')}
+  </div>
+  <div class="card"><div class="ct">📱 SMS Log (${smsLog.length} sent)</div>
+    ${smsLog.length===0?'<div style="color:var(--t3);font-size:13px;padding:8px 0">No SMS sent yet</div>':
+    smsLog.slice(0,10).map(s=>`<div class="vrow"><div><div class="vrow-id">${s.context||''} · ${new Date(s.sentAt).toLocaleDateString('en-KE')}</div><div class="vrow-name">To: ${s.to}</div><div class="vrow-desc" style="font-style:italic">${s.msg.substring(0,80)}…</div></div><span class="badge b-delivered" style="flex-shrink:0;align-self:flex-start">Sent</span></div>`).join('')}
+  </div>
+  <div class="card"><div class="ct" style="color:var(--red)">⚠️ Danger Zone</div>
+    <button class="btn btn-d btn-full" onclick="clearAll()">🗑️ Delete All Parcel Data</button>
+    <div style="font-size:12px;color:var(--t3);margin-top:8px;text-align:center">Permanently deletes all parcel records. Users & vehicles kept.</div>
+  </div>`;
+}
+function addUser(){
+  const n=document.getElementById('nun').value.trim(),u=document.getElementById('nuu').value.trim(),pw=document.getElementById('nupw').value,r=document.getElementById('nur').value;
+  if(!n||!u||!pw){toast('⚠ All fields required');return;}
+  if(users.find(x=>x.username===u)){toast('⚠ Username already exists');return;}
+  users.push({id:'u'+Date.now(),name:n,username:u,password:pw,role:r});
+  saveU();closeD('drw-user');renderAdmin();toast('✓ User '+u+' added');
+}
+function delUser(id){if(!confirm('Remove this user?'))return;users=users.filter(u=>u.id!==id);saveU();renderAdmin();toast('User removed');}
+
+function exportCSV(){
+  if(!S.parcels.length){toast('No parcels to export');return;}
+  const h=['ID','Date','Sender','Sender Phone','Receiver','Receiver Phone','Address','Description','Goods Value(KES)','Delivery Cost(KES)','Payment','Partner','Term','Custom Term','Vehicle','Status','Track Code','Issued To','Issued ID','Recorded By','Notes'];
+  const rows=S.parcels.map(p=>[p.id,p.date,p.sender,p.senderPhone||'',p.receiver,p.receiverPhone||'',p.address||'',p.description,p.goodsValue||0,p.cost,p.payment,p.partner||'',p.term||'',p.customTerm||'',p.vehicle||'',p.status,p.trackCode||'',p.issuedTo||'',p.issuedId||'',p.recordedBy||'',p.notes||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent([h.join(','),...rows].join('\n'));a.download='nmd_parcels_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('✓ CSV exported');
+}
+function clearAll(){if(!confirm('Delete ALL parcel records? Cannot be undone.'))return;S.parcels=[];S.nextId=1;S.smsLog=[];saveD();renderAdmin();toast('Data cleared');}
+
+window.doLogin=doLogin;window.doLogout=doLogout;window.switchTab=switchTab;
+window.selPay=selPay;window.iTogCT=iTogCT;window.addParcel=addParcel;
+window.setPF=setPF;window.onSearch=onSearch;window.clearSearch=clearSearch;
+window.openEdit=openEdit;window.saveEdit=saveEdit;window.etogglePart=etogglePart;window.etogCT=etogCT;
+window.closeD=closeD;window.openD=openD;
+window.toggleSelect=toggleSelect;window.doDispatch=doDispatch;
+window.lookupParcel=lookupParcel;window.issueParcel=issueParcel;
+window.setPeriod=setPeriod;window.applyDateRange=applyDateRange;window.pieClick=pieClick;
+window.addVehicle=addVehicle;window.addUser=addUser;window.delUser=delUser;
+window.exportCSV=exportCSV;window.clearAll=clearAll;
+
+loadAll();
+</script>
+</body>
+</html>
