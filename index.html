@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>NMD Deliveries</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
 <style>
 :root{
   --bg:#f2f1ed;--surface:#fff;--s2:#f0efe9;--border:#e2e0d8;--b2:#d0cfc6;
@@ -176,11 +177,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .b-term{background:var(--tbg);color:var(--teal)}
 
 /* DISPATCH */
-.dispatch-bar{background:var(--accent);color:white;padding:12px 16px;margin:0 -16px;display:none;align-items:center;justify-content:space-between;gap:8px;position:sticky;bottom:0}
+.dispatch-bar{background:var(--accent);color:white;padding:12px 16px;margin:0 -16px;display:none;flex-direction:column;gap:8px;position:sticky;bottom:0}
 .dispatch-bar.show{display:flex}
-.dispatch-bar select{padding:8px 12px;border-radius:6px;border:none;font-size:14px;font-family:'DM Sans',sans-serif;background:rgba(255,255,255,.15);color:white;flex:1}
+.dispatch-bar select,.dispatch-bar input{padding:8px 12px;border-radius:6px;border:none;font-size:14px;font-family:'DM Sans',sans-serif;background:rgba(255,255,255,.15);color:white;min-width:0}
 .dispatch-bar select option{color:var(--text);background:white}
-.dispatch-btn{padding:10px 16px;background:white;color:var(--accent);border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.dispatch-bar input::placeholder{color:rgba(255,255,255,.65)}
+.dispatch-row{display:flex;gap:8px;align-items:center}
+.dispatch-row select{flex:1}
+.dispatch-row input{flex:1}
+.dispatch-tripcost-label{font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-top:2px}
+.dispatch-btn{padding:10px 16px;background:white;color:var(--accent);border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;width:100%}
 
 /* ISSUE PARCEL */
 .receive-box{background:var(--surface);border:2px dashed var(--b2);border-radius:var(--r);padding:24px;text-align:center;margin-bottom:16px}
@@ -225,6 +231,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .rsum{background:var(--s2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
 .rsumg .rhl{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
 .rsumg .rhv{font-size:16px;font-weight:700}
+
+/* PROFIT & LOSS */
+.plrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13.5px}
+.plrow:last-child{border-bottom:none}
+.plrow.bold{font-weight:700}
+.plsection{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.5px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--b2)}
+.profit-box{border-radius:var(--rs);padding:16px;text-align:center;margin-top:16px}
+.profit-box.pos{background:var(--gbg);border:1px solid #b7e4c7}
+.profit-box.neg{background:var(--rbg);border:1px solid #fca5a5}
+.profit-box .pl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--t2)}
+.profit-box .pv{font-size:27px;font-weight:700;margin-top:4px;line-height:1.1}
+.profit-box.pos .pv{color:var(--green)}
+.profit-box.neg .pv{color:var(--red)}
+.profit-box .pf{font-size:10.5px;color:var(--t3);margin-top:8px;font-family:'DM Mono',monospace;line-height:1.6}
+
+/* RECEIPT ATTACHMENTS */
+.field input[type=file]{padding:11px 14px;font-size:13px;border:1.5px dashed var(--b2);border-radius:var(--rs);background:var(--s2);cursor:pointer;color:var(--t2);width:100%;font-family:'DM Sans',sans-serif}
+.receipt-preview-row{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px;background:var(--s2);border-radius:var(--rs);border:1px solid var(--border)}
+.receipt-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--bg);border:1px solid var(--border)}
+.receipt-thumb-pdf{display:flex;align-items:center;justify-content:center;font-size:22px}
+.receipt-pv-info{flex:1;min-width:0}
+.receipt-pv-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;color:var(--text)}
+.receipt-view-img{width:100%;border-radius:var(--rs);border:1px solid var(--border)}
 
 /* VEHICLE CARD */
 .vcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
@@ -290,10 +319,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .ni.locked:hover{background:transparent}
 .ni-icon{font-size:15px;width:20px;text-align:center}
 
+/* RECEIPT */
+.receipt-wrap{display:flex;justify-content:center;background:#5c5a52;border-radius:var(--rs);padding:20px 10px;margin-bottom:14px}
+.receipt{font-family:'DM Mono',monospace;color:#000;background:#fff;width:80mm;max-width:100%;margin:0 auto;padding:5mm 4mm;font-size:11.5px;line-height:1.5;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.receipt.w58{width:58mm;font-size:10px;padding:4mm 3mm}
+.receipt .rc{text-align:center}
+.receipt h1{font-size:15px;font-weight:700;letter-spacing:1.5px;text-align:center;margin-bottom:2px}
+.receipt .rtag{font-size:9.5px;text-align:center;margin-bottom:1px}
+.receipt .rmeta{font-size:9.5px;text-align:center;color:#333}
+.receipt hr{border:none;border-top:1px dashed #000;margin:7px 0}
+.receipt .rrow{display:flex;justify-content:space-between;gap:8px;font-size:11px}
+.receipt .rlabel{font-size:9px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-top:7px;margin-bottom:2px}
+.receipt .rval{font-size:11.5px;font-weight:600;word-break:break-word}
+.receipt .rsmall{font-size:10px;color:#333}
+.receipt .rcode{font-size:21px;font-weight:700;text-align:center;letter-spacing:2.5px;padding:7px 0;border:1.5px dashed #000;margin:7px 0}
+.receipt .rcode-sub{font-size:8.5px;text-align:center;letter-spacing:.5px;text-transform:uppercase;color:#333;margin-bottom:2px}
+.receipt .rfoot{text-align:center;font-size:10px;margin-top:8px}
+.receipt .rbarcode{display:flex;justify-content:center;margin-top:6px}
+.receipt .rbarcode svg{max-width:100%}
+.width-toggle{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+.wt-pill{padding:8px 18px;border:1.5px solid var(--b2);border-radius:20px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;background:var(--surface)}
+.wt-pill.active{background:var(--accent);color:white;border-color:var(--accent)}
+#receipt-area{display:none}
+
 @media print{
   .tab-bar,.hdr,.dsk-sidebar,.btn,.btn-sm,.btn-print,.fbar,.dispatch-bar,.drawer-overlay,.toast,.search-wrap,.date-range-bar,.period-pills,.pie-wrap{display:none!important}
   body{background:white}
   .body-scroll{position:static;overflow:visible}
+  body.printing-receipt .body-scroll,body.printing-receipt .main{display:none!important}
+  body.printing-receipt #receipt-area{display:block!important}
+  #receipt-area .receipt{box-shadow:none;width:100%;margin:0;padding:2mm 3mm}
 }
 </style>
 </head>
@@ -302,7 +357,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="lbox">
-    <div class="llogo"><div class="llogo-icon">📦</div><h1>NMD Deliveries</h1><p>Nairobi–Mandera Parcel System</p></div>
+    <div class="llogo"><div class="llogo-icon">📦</div><h1>NMD Deliveries</h1><p>Nairobi · Mandera · Rhamu · El Wak · Kotulo</p></div>
     <div class="lf"><label>Username</label><input type="text" id="lu" placeholder="Enter username" autocomplete="username" autocapitalize="none"></div>
     <div class="lf"><label>Password</label><input type="password" id="lp" placeholder="Enter password" autocomplete="current-password"></div>
     <button class="lbtn" onclick="doLogin()">Sign In →</button>
@@ -320,7 +375,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 <div id="main-app">
   <nav class="dsk-sidebar" id="dsk-sidebar"></nav>
   <header class="hdr">
-    <div class="hbrand"><span style="font-size:20px">📦</span><div><div class="htitle">NMD Deliveries</div><div class="hsub">Nairobi–Mandera</div></div></div>
+    <div class="hbrand"><span style="font-size:20px">📦</span><div><div class="htitle">NMD Deliveries</div><div class="hsub">Nairobi · 4 Routes</div></div></div>
     <div class="hright">
       <div class="uchip"><div class="uav" id="uav"></div><div><div class="uname" id="uname"></div><div class="urole" id="urole"></div></div></div>
       <button class="logout-btn" onclick="doLogout()">Out</button>
@@ -345,9 +400,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   <div class="drawer">
     <div class="drawer-handle"></div>
     <div class="drawer-title">✏️ Edit Parcel <span id="epid" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--t3)"></span></div>
+    <div class="field"><label>Destination Town</label><select id="edestn" onchange="updateEditDestInfo()"></select></div>
     <div class="fg"><div class="field"><label>Sender Name</label><input id="es"></div><div class="field"><label>Sender Phone</label><input id="esp" type="tel"></div></div>
     <div class="fg"><div class="field"><label>Receiver Name</label><input id="er"></div><div class="field"><label>Receiver Phone</label><input id="erp" type="tel"></div></div>
-    <div class="field"><label>Address in Mandera</label><input id="eaddr"></div>
+    <div class="field"><label>Delivery Address</label><input id="eaddr"></div>
     <div class="fg"><div class="field"><label>Description</label><input id="edesc"></div><div class="field"><label>Goods Value (KES)</label><input id="ewt" type="number" inputmode="numeric"></div></div>
     <div class="fg"><div class="field"><label>Delivery Cost (KES)</label><input id="ecost" type="number" inputmode="numeric"></div>
     <div class="field"><label>Status</label><select id="estat"><option value="pending">Pending</option><option value="dispatched">Dispatched</option><option value="intransit">In Transit</option><option value="delivered">Delivered</option></select></div></div>
@@ -378,6 +434,37 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- ADD COST ENTRY DRAWER -->
+<div class="drawer-overlay" id="drw-cost">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">💰 Log Cost Entry</div>
+    <div class="fg"><div class="field"><label>Date</label><input id="ccdate" type="date"></div>
+    <div class="field"><label>Category</label><select id="cccat"><option value="mileage">Mileage</option><option value="fuel">Fuel</option><option value="lorry_balance">Balance of the Lorry</option><option value="expense">Expense</option></select></div></div>
+    <div class="field"><label>Vehicle <span style="text-transform:none;font-weight:400">(optional)</span></label><select id="ccveh"><option value="">— General / Not vehicle-specific —</option></select></div>
+    <div class="field"><label>Amount (KES)</label><input id="ccamt" type="number" min="0" inputmode="numeric" placeholder="0"></div>
+    <div class="field"><label>Note</label><input id="ccnote" placeholder="e.g. Fuel — Garissa refuel"></div>
+    <div class="field">
+      <label>Proof / Receipt <span style="text-transform:none;font-weight:400">(optional — photo or PDF)</span></label>
+      <input type="file" id="ccfile" accept="image/*,application/pdf" onchange="handleCostFile(event)">
+      <div class="fh">Photos are compressed automatically. PDFs up to 4MB.</div>
+      <div id="cc-file-preview"></div>
+    </div>
+    <div class="drawer-actions"><button class="btn btn-p btn-full" onclick="addCostEntry()">Save Cost Entry</button><button class="btn btn-s btn-full" onclick="closeD('drw-cost')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- RECEIPT VIEWER DRAWER -->
+<div class="drawer-overlay" id="drw-receipt-view">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">📎 Cost Receipt</div>
+    <div id="receipt-view-body"></div>
+    <div class="drawer-actions"><button class="btn btn-s btn-full" onclick="closeD('drw-receipt-view')">Close</button></div>
+  </div>
+</div>
+<input type="file" id="attach-receipt-input" accept="image/*,application/pdf" style="display:none" onchange="handleAttachReceiptFile(event)">
+
 <!-- ADD USER DRAWER -->
 <div class="drawer-overlay" id="drw-user">
   <div class="drawer">
@@ -399,6 +486,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   </div>
 </div>
 
+<!-- RECEIPT PREVIEW DRAWER -->
+<div class="drawer-overlay" id="drw-receipt">
+  <div class="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-title">🧾 Parcel Receipt</div>
+    <div class="width-toggle">
+      <div class="wt-pill active" id="wt-80" onclick="setReceiptWidth('80')">80mm Printer</div>
+      <div class="wt-pill" id="wt-58" onclick="setReceiptWidth('58')">58mm Printer</div>
+    </div>
+    <div class="receipt-wrap"><div id="receipt-preview"></div></div>
+    <div class="fh" style="text-align:center;margin-bottom:6px">To save as PDF instead of printing, choose "Save as PDF" as the destination in the print dialog.</div>
+    <div class="drawer-actions">
+      <button class="btn btn-p btn-full" onclick="printReceipt()">🖨️ Print / Save as PDF</button>
+      <button class="btn btn-s btn-full" onclick="closeD('drw-receipt')">Done</button>
+    </div>
+  </div>
+</div>
+<div id="receipt-area"></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -409,53 +515,89 @@ const DU=[
   {id:'u3',name:'Admin User',username:'admin',password:'admin123',role:'admin'},
 ];
 let users=[],sess={user:null};
-let S={parcels:[],vehicles:[{id:'KBZ 123A',driver:'Ali Hassan',type:'Pickup',capacity:500},{id:'KDA 456B',driver:'Mussa Odhiambo',type:'Van',capacity:1000},{id:'KCE 789C',driver:'Patrick Mwenda',type:'Pickup',capacity:500}],nextId:1,smsLog:[]};
+let S={parcels:[],vehicles:[{id:'KBZ 123A',driver:'Ali Hassan',type:'Pickup',capacity:500},{id:'KDA 456B',driver:'Mussa Odhiambo',type:'Van',capacity:1000},{id:'KCE 789C',driver:'Patrick Mwenda',type:'Pickup',capacity:500}],nextId:1,smsLog:[],costs:[],costNextId:1};
 const RL={staff:'Staff',supervisor:'Supervisor',admin:'Administrator'};
 const RI={staff:'👷',supervisor:'🗂️',admin:'🛡️'};
 const RC={staff:'r-staff',supervisor:'r-supervisor',admin:'r-admin'};
 
+/* ══ DESTINATIONS — exact coordinates & road routes per Google Maps ══ */
+const ORIGIN={name:'Nairobi',lat:-1.2920659,lng:36.8219462,placeId:'ChIJp0lN2HIRLxgRTJKXslQCz_c'};
+const DESTINATIONS={
+  KOTULO:{code:'KOTULO',name:'Kotulo',lat:2.4388141,lng:40.7564002,distanceKm:810,etaHrs:12,route:'Nairobi → Thika → Garissa → Wajir → Kotulo',color:'#9a3412',bg:'#ffedd5',placeId:'ChIJncxYZ4lR7BcRiVFGQhCeWlQ'},
+  ELWAK:{code:'ELWAK',name:'El Wak',lat:2.8070021,lng:40.9283904,distanceKm:865,etaHrs:13,route:'Nairobi → Thika → Garissa → Wajir → El Wak',color:'#4c1d95',bg:'#ede9fe',placeId:'ChIJjfxmBA917BcRliU82Cmszb0'},
+  RHAMU:{code:'RHAMU',name:'Rhamu',lat:3.9324851,lng:41.2198695,distanceKm:1007,etaHrs:15,route:'Nairobi → Garissa → Wajir → El Wak → Rhamu',color:'#1a4b7a',bg:'#dbeafe',placeId:'ChIJIwVczOv5wRcRFz0UpQFgK8M'},
+  MANDERA:{code:'MANDERA',name:'Mandera',lat:3.9356389,lng:41.8551162,distanceKm:1080,etaHrs:16,route:'Nairobi → Garissa → Wajir → El Wak → Rhamu → Mandera',color:'#1a3a2a',bg:'#e8f0eb',placeId:'ChIJYb7fTqJjwhcRF-c5FnIgLOE'},
+};
+const DEST_ORDER=['MANDERA','RHAMU','ELWAK','KOTULO'];
+function destOptionsHTML(sel){return DEST_ORDER.map(k=>`<option value="${k}" ${sel===k?'selected':''}>${DESTINATIONS[k].name}</option>`).join('');}
+function routeName(code){return(DESTINATIONS[code]||DESTINATIONS.MANDERA).name;}
+function dbadge(code){const d=DESTINATIONS[code]||DESTINATIONS.MANDERA;return`<span class="badge" style="background:${d.bg};color:${d.color}">📍 ${d.name}</span>`;}
+function destInfoLine(code){const d=DESTINATIONS[code]||DESTINATIONS.MANDERA;return`🛣️ ${d.distanceKm.toLocaleString()} km · ~${d.etaHrs} hrs · ${d.route}`;}
+
 function can(p){return({
-  staff:   {intake:true,parcels:true,dispatch:true,issue:true,reports:false,vehicles:true,admin:false,edit:false},
-  supervisor:{intake:false,parcels:true,dispatch:true,issue:true,reports:true,vehicles:true,admin:false,edit:true},
-  admin:   {intake:true,parcels:true,dispatch:true,issue:true,reports:true,vehicles:true,admin:true,edit:true}
+  staff:   {intake:true,parcels:true,dispatch:true,issue:true,reports:false,vehicles:true,admin:false,edit:false,costadd:true},
+  supervisor:{intake:false,parcels:true,dispatch:true,issue:true,reports:true,vehicles:true,admin:false,edit:true,costadd:true},
+  admin:   {intake:true,parcels:true,dispatch:true,issue:true,reports:true,vehicles:true,admin:true,edit:true,costadd:true}
 }[role()]||{})[p]||false;}
 
 const SP=[
-  {id:'P0001',date:'2025-04-20',sender:'John Mwangi',senderPhone:'0712345678',receiver:'Halima Aden',receiverPhone:'0722111001',address:'Mandera Town, Opp. Equity Bank',description:'Electronics',goodsValue:8000,cost:1200,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'HAD001',notes:'Handle with care',recordedBy:'Staff Member',recordedAt:'2025-04-20T08:10:00Z',dispatchedAt:'2025-04-20T10:00:00Z',intransitAt:'2025-04-20T18:00:00Z',deliveredAt:'2025-04-21T14:00:00Z',issuedTo:'Halima Aden',issuedId:'12345678',editLog:[]},
-  {id:'P0002',date:'2025-04-21',sender:'Amina Wanjiru',senderPhone:'0723456789',receiver:'Hassan Omar',receiverPhone:'0733222002',address:'Lafey Road, Mandera',description:'Clothes & Shoes',goodsValue:5000,cost:850,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'HOM002',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-21T09:30:00Z',dispatchedAt:'2025-04-21T11:00:00Z',intransitAt:'2025-04-21T19:00:00Z',deliveredAt:'2025-04-22T15:00:00Z',issuedTo:'Hassan Omar',issuedId:'23456789',editLog:[]},
-  {id:'P0003',date:'2025-04-21',sender:'Peter Kamau',senderPhone:'0734567890',receiver:'Fatuma Ali',receiverPhone:'0744333003',address:'Near Mandera District Hospital',description:'Medicine & Supplements',goodsValue:3500,cost:600,payment:'partner',partner:'AMKA',term:'1week',customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'FAL003',notes:'Urgent',recordedBy:'Staff Member',recordedAt:'2025-04-21T10:00:00Z',dispatchedAt:'2025-04-21T12:00:00Z',intransitAt:'2025-04-21T20:00:00Z',deliveredAt:'2025-04-22T16:00:00Z',issuedTo:'Fatuma Ali',issuedId:'34567890',editLog:[]},
-  {id:'P0004',date:'2025-04-22',sender:'Grace Otieno',senderPhone:'0745678901',receiver:'Ibrahim Said',receiverPhone:'0755444004',address:'Mandera Central Market',description:'Food Items & Groceries',goodsValue:12000,cost:1800,payment:'partner',partner:'KIDBA',term:'2weeks',customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'ISA004',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-22T07:45:00Z',dispatchedAt:'2025-04-22T09:00:00Z',intransitAt:'2025-04-22T17:00:00Z',deliveredAt:'2025-04-23T14:00:00Z',issuedTo:'Ibrahim Said',issuedId:'45678901',editLog:[]},
-  {id:'P0005',date:'2025-04-22',sender:'David Njiru',senderPhone:'0756789012',receiver:'Maryam Hassan',receiverPhone:'0766555005',address:'Mandera East, Phase 2',description:'Documents & Files',goodsValue:1000,cost:350,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KCE 789C',status:'delivered',trackCode:'MHA005',notes:'Confidential',recordedBy:'Staff Member',recordedAt:'2025-04-22T11:20:00Z',dispatchedAt:'2025-04-22T13:00:00Z',intransitAt:'2025-04-22T21:00:00Z',deliveredAt:'2025-04-23T15:30:00Z',issuedTo:'Maryam Hassan',issuedId:'56789012',editLog:[]},
-  {id:'P0006',date:'2025-04-23',sender:'Sarah Muthoni',senderPhone:'0767890123',receiver:'Abdi Warsame',receiverPhone:'0777666006',address:'Takaba Road, Mandera',description:'Hardware & Tools',goodsValue:25000,cost:3200,payment:'partner',partner:'MATTA',term:'1month',customTerm:null,vehicle:'KCE 789C',status:'delivered',trackCode:'AWA006',notes:'Heavy',recordedBy:'Staff Member',recordedAt:'2025-04-23T08:00:00Z',dispatchedAt:'2025-04-23T10:00:00Z',intransitAt:'2025-04-23T18:00:00Z',deliveredAt:'2025-04-24T16:00:00Z',issuedTo:'Abdi Warsame',issuedId:'67890123',editLog:[]},
-  {id:'P0007',date:'2025-04-24',sender:'James Oloo',senderPhone:'0778901234',receiver:'Khadija Farah',receiverPhone:'0788777007',address:'Mandera Town Centre',description:'Shoes & Bags',goodsValue:6500,cost:750,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'KFA007',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-24T09:15:00Z',dispatchedAt:'2025-04-24T11:00:00Z',intransitAt:'2025-04-24T19:00:00Z',deliveredAt:'2025-04-25T14:00:00Z',issuedTo:'Khadija Farah',issuedId:'78901234',editLog:[]},
-  {id:'P0008',date:'2025-04-25',sender:'Ruth Akinyi',senderPhone:'0789012345',receiver:'Yahya Mohamed',receiverPhone:'0799888008',address:'Near Mandera Police Station',description:'Spare Parts',goodsValue:18000,cost:2400,payment:'partner',partner:'AMKA',term:'custom',customTerm:'45 days',vehicle:'KDA 456B',status:'delivered',trackCode:'YMO008',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-25T10:30:00Z',dispatchedAt:'2025-04-25T12:00:00Z',intransitAt:'2025-04-25T20:00:00Z',deliveredAt:'2025-04-26T15:00:00Z',issuedTo:'Yahya Mohamed',issuedId:'89012345',editLog:[]},
-  {id:'P0009',date:'2025-04-26',sender:'Ali Hassan Gure',senderPhone:'0700123456',receiver:'Nasrin Abdi',receiverPhone:'0711999009',address:'Mandera North, Dandu Area',description:'Baby Items & Diapers',goodsValue:7500,cost:1100,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'intransit',trackCode:'NAB009',notes:'Call on arrival',recordedBy:'Staff Member',recordedAt:'2025-04-26T07:00:00Z',dispatchedAt:'2025-04-26T09:00:00Z',intransitAt:'2025-04-26T17:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0010',date:'2025-04-26',sender:'Fatma Ndegwa',senderPhone:'0701234567',receiver:'Omar Sheikh',receiverPhone:'0712000010',address:'Lafey District, Mandera',description:'Textbooks & Stationery',goodsValue:4500,cost:900,payment:'partner',partner:'KIDBA',term:'3days',customTerm:null,vehicle:'KCE 789C',status:'intransit',trackCode:'OSH010',notes:'School supplies',recordedBy:'Staff Member',recordedAt:'2025-04-26T08:40:00Z',dispatchedAt:'2025-04-26T10:00:00Z',intransitAt:'2025-04-26T18:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0011',date:'2025-04-27',sender:'Moses Kipchoge',senderPhone:'0702345678',receiver:'Hodan Ahmed',receiverPhone:'0713100011',address:'Mandera Town, Garissa Road',description:'Electronics — Phones',goodsValue:35000,cost:2800,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'dispatched',trackCode:'HAH011',notes:'High value',recordedBy:'Staff Member',recordedAt:'2025-04-27T09:00:00Z',dispatchedAt:'2025-04-27T11:00:00Z',intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[{by:'Supervisor',at:'2025-04-27T14:00:00Z',reason:'Corrected receiver phone number'}]},
-  {id:'P0012',date:'2025-04-27',sender:'Naomi Waweru',senderPhone:'0703456789',receiver:'Ismail Duale',receiverPhone:'0714200012',address:'Near Mandera County Hospital',description:'Medical Equipment',goodsValue:45000,cost:4500,payment:'partner',partner:'MATTA',term:'2weeks',customTerm:null,vehicle:'KBZ 123A',status:'dispatched',trackCode:'IDU012',notes:'Fragile',recordedBy:'Staff Member',recordedAt:'2025-04-27T10:15:00Z',dispatchedAt:'2025-04-27T12:00:00Z',intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0013',date:'2025-04-28',sender:'Joseph Mutua',senderPhone:'0704567890',receiver:'Asad Warsame',receiverPhone:'0715300013',address:'Mandera West, Elwak',description:'Household Goods',goodsValue:22000,cost:3800,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'AWA013',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-28T07:30:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0014',date:'2025-04-28',sender:'Elizabeth Wambui',senderPhone:'0705678901',receiver:'Safia Nur',receiverPhone:'0716400014',address:'Mandera Town, Market Area',description:'Fabric & Tailoring Materials',goodsValue:9000,cost:1350,payment:'partner',partner:'AMKA',term:'1week',customTerm:null,vehicle:null,status:'pending',trackCode:'SNU014',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-28T11:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0015',date:'2025-04-29',sender:'Samuel Karanja',senderPhone:'0706789012',receiver:'Abshir Hassan',receiverPhone:'0717500015',address:'Banissa, Mandera County',description:'Solar Panels & Batteries',goodsValue:80000,cost:6500,payment:'partner',partner:'KIDBA',term:'custom',customTerm:'End of month',vehicle:null,status:'pending',trackCode:'AHA015',notes:'Very heavy',recordedBy:'Staff Member',recordedAt:'2025-04-29T08:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0016',date:'2025-04-29',sender:'Lucy Njeri',senderPhone:'0707890123',receiver:'Mohamed Bare',receiverPhone:'0718600016',address:'Mandera Town Centre',description:'Cosmetics & Beauty Products',goodsValue:11000,cost:980,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'MBA016',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-29T09:45:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0017',date:'2025-04-30',sender:'Charles Otieno',senderPhone:'0708901234',receiver:'Ruqiya Abdi',receiverPhone:'0719700017',address:'Rhamu, Mandera County',description:'Tyres & Auto Parts',goodsValue:55000,cost:5200,payment:'partner',partner:'MATTA',term:'2weeks',customTerm:null,vehicle:null,status:'pending',trackCode:'RAB017',notes:'Large package',recordedBy:'Staff Member',recordedAt:'2025-04-30T07:15:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0018',date:'2025-04-30',sender:'Margaret Wanjiku',senderPhone:'0709012345',receiver:'Yusuf Omar',receiverPhone:'0720800018',address:'Mandera East',description:'Furniture Parts',goodsValue:30000,cost:4100,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'YOU018',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-30T10:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0019',date:'2025-05-01',sender:'Brian Ochieng',senderPhone:'0710123456',receiver:'Fardowsa Ahmed',receiverPhone:'0721900019',address:'Mandera Town, Near Mosque',description:'Frozen Foods (Insulated)',goodsValue:8500,cost:1600,payment:'partner',partner:'AMKA',term:'3days',customTerm:null,vehicle:null,status:'pending',trackCode:'FAH019',notes:'Perishable',recordedBy:'Staff Member',recordedAt:'2025-05-01T06:30:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
-  {id:'P0020',date:'2025-05-01',sender:'Winnie Chebet',senderPhone:'0711234567',receiver:'Abdullahi Sheikh',receiverPhone:'0722000020',address:'Mandera North',description:'Computers & Accessories',goodsValue:65000,cost:3500,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'ASH020',notes:'High value',recordedBy:'Staff Member',recordedAt:'2025-05-01T08:20:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0001',date:'2025-04-20',destination:'MANDERA',sender:'John Mwangi',senderPhone:'0712345678',receiver:'Halima Aden',receiverPhone:'0722111001',address:'Mandera Town, Opp. Equity Bank',description:'Electronics',goodsValue:8000,cost:1200,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'HAD001',notes:'Handle with care',recordedBy:'Staff Member',recordedAt:'2025-04-20T08:10:00Z',dispatchedAt:'2025-04-20T10:00:00Z',intransitAt:'2025-04-20T18:00:00Z',deliveredAt:'2025-04-21T14:00:00Z',issuedTo:'Halima Aden',issuedId:'12345678',editLog:[]},
+  {id:'P0002',date:'2025-04-21',destination:'MANDERA',sender:'Amina Wanjiru',senderPhone:'0723456789',receiver:'Hassan Omar',receiverPhone:'0733222002',address:'Lafey Road, Mandera',description:'Clothes & Shoes',goodsValue:5000,cost:850,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'HOM002',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-21T09:30:00Z',dispatchedAt:'2025-04-21T11:00:00Z',intransitAt:'2025-04-21T19:00:00Z',deliveredAt:'2025-04-22T15:00:00Z',issuedTo:'Hassan Omar',issuedId:'23456789',editLog:[]},
+  {id:'P0003',date:'2025-04-21',destination:'MANDERA',sender:'Peter Kamau',senderPhone:'0734567890',receiver:'Fatuma Ali',receiverPhone:'0744333003',address:'Near Mandera District Hospital',description:'Medicine & Supplements',goodsValue:3500,cost:600,payment:'partner',partner:'AMKA',term:'1week',customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'FAL003',notes:'Urgent',recordedBy:'Staff Member',recordedAt:'2025-04-21T10:00:00Z',dispatchedAt:'2025-04-21T12:00:00Z',intransitAt:'2025-04-21T20:00:00Z',deliveredAt:'2025-04-22T16:00:00Z',issuedTo:'Fatuma Ali',issuedId:'34567890',editLog:[]},
+  {id:'P0004',date:'2025-04-22',destination:'MANDERA',sender:'Grace Otieno',senderPhone:'0745678901',receiver:'Ibrahim Said',receiverPhone:'0755444004',address:'Mandera Central Market',description:'Food Items & Groceries',goodsValue:12000,cost:1800,payment:'partner',partner:'KIDBA',term:'2weeks',customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'ISA004',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-22T07:45:00Z',dispatchedAt:'2025-04-22T09:00:00Z',intransitAt:'2025-04-22T17:00:00Z',deliveredAt:'2025-04-23T14:00:00Z',issuedTo:'Ibrahim Said',issuedId:'45678901',editLog:[]},
+  {id:'P0005',date:'2025-04-22',destination:'MANDERA',sender:'David Njiru',senderPhone:'0756789012',receiver:'Maryam Hassan',receiverPhone:'0766555005',address:'Mandera East, Phase 2',description:'Documents & Files',goodsValue:1000,cost:350,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KCE 789C',status:'delivered',trackCode:'MHA005',notes:'Confidential',recordedBy:'Staff Member',recordedAt:'2025-04-22T11:20:00Z',dispatchedAt:'2025-04-22T13:00:00Z',intransitAt:'2025-04-22T21:00:00Z',deliveredAt:'2025-04-23T15:30:00Z',issuedTo:'Maryam Hassan',issuedId:'56789012',editLog:[]},
+  {id:'P0006',date:'2025-04-23',destination:'MANDERA',sender:'Sarah Muthoni',senderPhone:'0767890123',receiver:'Abdi Warsame',receiverPhone:'0777666006',address:'Takaba Road, Mandera',description:'Hardware & Tools',goodsValue:25000,cost:3200,payment:'partner',partner:'MATTA',term:'1month',customTerm:null,vehicle:'KCE 789C',status:'delivered',trackCode:'AWA006',notes:'Heavy',recordedBy:'Staff Member',recordedAt:'2025-04-23T08:00:00Z',dispatchedAt:'2025-04-23T10:00:00Z',intransitAt:'2025-04-23T18:00:00Z',deliveredAt:'2025-04-24T16:00:00Z',issuedTo:'Abdi Warsame',issuedId:'67890123',editLog:[]},
+  {id:'P0007',date:'2025-04-24',destination:'MANDERA',sender:'James Oloo',senderPhone:'0778901234',receiver:'Khadija Farah',receiverPhone:'0788777007',address:'Mandera Town Centre',description:'Shoes & Bags',goodsValue:6500,cost:750,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'delivered',trackCode:'KFA007',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-24T09:15:00Z',dispatchedAt:'2025-04-24T11:00:00Z',intransitAt:'2025-04-24T19:00:00Z',deliveredAt:'2025-04-25T14:00:00Z',issuedTo:'Khadija Farah',issuedId:'78901234',editLog:[]},
+  {id:'P0008',date:'2025-04-25',destination:'MANDERA',sender:'Ruth Akinyi',senderPhone:'0789012345',receiver:'Yahya Mohamed',receiverPhone:'0799888008',address:'Near Mandera Police Station',description:'Spare Parts',goodsValue:18000,cost:2400,payment:'partner',partner:'AMKA',term:'custom',customTerm:'45 days',vehicle:'KDA 456B',status:'delivered',trackCode:'YMO008',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-25T10:30:00Z',dispatchedAt:'2025-04-25T12:00:00Z',intransitAt:'2025-04-25T20:00:00Z',deliveredAt:'2025-04-26T15:00:00Z',issuedTo:'Yahya Mohamed',issuedId:'89012345',editLog:[]},
+  {id:'P0009',date:'2025-04-26',destination:'MANDERA',sender:'Ali Hassan Gure',senderPhone:'0700123456',receiver:'Nasrin Abdi',receiverPhone:'0711999009',address:'Mandera North, Dandu Area',description:'Baby Items & Diapers',goodsValue:7500,cost:1100,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KBZ 123A',status:'intransit',trackCode:'NAB009',notes:'Call on arrival',recordedBy:'Staff Member',recordedAt:'2025-04-26T07:00:00Z',dispatchedAt:'2025-04-26T09:00:00Z',intransitAt:'2025-04-26T17:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0010',date:'2025-04-26',destination:'MANDERA',sender:'Fatma Ndegwa',senderPhone:'0701234567',receiver:'Omar Sheikh',receiverPhone:'0712000010',address:'Lafey District, Mandera',description:'Textbooks & Stationery',goodsValue:4500,cost:900,payment:'partner',partner:'KIDBA',term:'3days',customTerm:null,vehicle:'KCE 789C',status:'intransit',trackCode:'OSH010',notes:'School supplies',recordedBy:'Staff Member',recordedAt:'2025-04-26T08:40:00Z',dispatchedAt:'2025-04-26T10:00:00Z',intransitAt:'2025-04-26T18:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0011',date:'2025-04-27',destination:'MANDERA',sender:'Moses Kipchoge',senderPhone:'0702345678',receiver:'Hodan Ahmed',receiverPhone:'0713100011',address:'Mandera Town, Garissa Road',description:'Electronics — Phones',goodsValue:35000,cost:2800,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'dispatched',trackCode:'HAH011',notes:'High value',recordedBy:'Staff Member',recordedAt:'2025-04-27T09:00:00Z',dispatchedAt:'2025-04-27T11:00:00Z',intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[{by:'Supervisor',at:'2025-04-27T14:00:00Z',reason:'Corrected receiver phone number'}]},
+  {id:'P0012',date:'2025-04-27',destination:'MANDERA',sender:'Naomi Waweru',senderPhone:'0703456789',receiver:'Ismail Duale',receiverPhone:'0714200012',address:'Near Mandera County Hospital',description:'Medical Equipment',goodsValue:45000,cost:4500,payment:'partner',partner:'MATTA',term:'2weeks',customTerm:null,vehicle:'KBZ 123A',status:'dispatched',trackCode:'IDU012',notes:'Fragile',recordedBy:'Staff Member',recordedAt:'2025-04-27T10:15:00Z',dispatchedAt:'2025-04-27T12:00:00Z',intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0013',date:'2025-04-28',destination:'MANDERA',sender:'Joseph Mutua',senderPhone:'0704567890',receiver:'Asad Warsame',receiverPhone:'0715300013',address:'Mandera West, Elwak',description:'Household Goods',goodsValue:22000,cost:3800,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'AWA013',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-28T07:30:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0014',date:'2025-04-28',destination:'MANDERA',sender:'Elizabeth Wambui',senderPhone:'0705678901',receiver:'Safia Nur',receiverPhone:'0716400014',address:'Mandera Town, Market Area',description:'Fabric & Tailoring Materials',goodsValue:9000,cost:1350,payment:'partner',partner:'AMKA',term:'1week',customTerm:null,vehicle:null,status:'pending',trackCode:'SNU014',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-28T11:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0015',date:'2025-04-29',destination:'MANDERA',sender:'Samuel Karanja',senderPhone:'0706789012',receiver:'Abshir Hassan',receiverPhone:'0717500015',address:'Banissa, Mandera County',description:'Solar Panels & Batteries',goodsValue:80000,cost:6500,payment:'partner',partner:'KIDBA',term:'custom',customTerm:'End of month',vehicle:null,status:'pending',trackCode:'AHA015',notes:'Very heavy',recordedBy:'Staff Member',recordedAt:'2025-04-29T08:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0016',date:'2025-04-29',destination:'MANDERA',sender:'Lucy Njeri',senderPhone:'0707890123',receiver:'Mohamed Bare',receiverPhone:'0718600016',address:'Mandera Town Centre',description:'Cosmetics & Beauty Products',goodsValue:11000,cost:980,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'MBA016',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-29T09:45:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0017',date:'2025-04-30',destination:'RHAMU',sender:'Charles Otieno',senderPhone:'0708901234',receiver:'Ruqiya Abdi',receiverPhone:'0719700017',address:'Rhamu Town Centre, near border post',description:'Tyres & Auto Parts',goodsValue:55000,cost:5800,payment:'partner',partner:'MATTA',term:'2weeks',customTerm:null,vehicle:null,status:'pending',trackCode:'RAB017',notes:'Large package',recordedBy:'Staff Member',recordedAt:'2025-04-30T07:15:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0018',date:'2025-04-30',destination:'MANDERA',sender:'Margaret Wanjiku',senderPhone:'0709012345',receiver:'Yusuf Omar',receiverPhone:'0720800018',address:'Mandera East',description:'Furniture Parts',goodsValue:30000,cost:4100,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'YOU018',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-30T10:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0019',date:'2025-05-01',destination:'ELWAK',sender:'Brian Ochieng',senderPhone:'0710123456',receiver:'Fardowsa Ahmed',receiverPhone:'0721900019',address:'El Wak Town, near the market',description:'Frozen Foods (Insulated)',goodsValue:8500,cost:4200,payment:'partner',partner:'AMKA',term:'3days',customTerm:null,vehicle:null,status:'pending',trackCode:'FAH019',notes:'Perishable',recordedBy:'Staff Member',recordedAt:'2025-05-01T06:30:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0020',date:'2025-05-01',destination:'MANDERA',sender:'Winnie Chebet',senderPhone:'0711234567',receiver:'Abdullahi Sheikh',receiverPhone:'0722000020',address:'Mandera North',description:'Computers & Accessories',goodsValue:65000,cost:3500,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'ASH020',notes:'High value',recordedBy:'Staff Member',recordedAt:'2025-05-01T08:20:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0021',date:'2025-05-02',destination:'RHAMU',sender:'Kevin Mwangi',senderPhone:'0712340021',receiver:'Halima Mire',receiverPhone:'0723000021',address:'Rhamu Town, near Ethiopia border post',description:'Motorcycle Spare Parts',goodsValue:42000,cost:5500,payment:'cash',partner:null,term:null,customTerm:null,vehicle:'KDA 456B',status:'delivered',trackCode:'HMI021',notes:'',recordedBy:'Staff Member',recordedAt:'2025-04-15T08:00:00Z',dispatchedAt:'2025-04-15T10:00:00Z',intransitAt:'2025-04-15T22:00:00Z',deliveredAt:'2025-04-16T18:00:00Z',issuedTo:'Halima Mire',issuedId:'40012345',editLog:[]},
+  {id:'P0022',date:'2025-05-02',destination:'ELWAK',sender:'Diana Achieng',senderPhone:'0713450022',receiver:'Adan Bashir',receiverPhone:'0724000022',address:'El Wak Town Centre, opp. Sub-County Hospital',description:'School Uniforms & Books',goodsValue:9500,cost:4100,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:'KCE 789C',status:'intransit',trackCode:'ABA022',notes:'',recordedBy:'Staff Member',recordedAt:'2025-05-02T07:20:00Z',dispatchedAt:'2025-05-02T09:00:00Z',intransitAt:'2025-05-02T20:00:00Z',deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0023',date:'2025-05-02',destination:'KOTULO',sender:'Patrick Mburu',senderPhone:'0714560023',receiver:'Sahra Nuradin',receiverPhone:'0725000023',address:'Kotulo Village Centre',description:'Water Pump & Irrigation Kit',goodsValue:31000,cost:4900,payment:'partner',partner:'KIDBA',term:'1month',customTerm:null,vehicle:null,status:'pending',trackCode:'SNU023',notes:'Heavy item',recordedBy:'Staff Member',recordedAt:'2025-05-02T09:10:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0024',date:'2025-05-03',destination:'KOTULO',sender:'Esther Wairimu',senderPhone:'0715670024',receiver:'Mohamud Ali',receiverPhone:'0726000024',address:'Kotulo, near the chief\'s camp',description:'Solar Lanterns',goodsValue:6000,cost:4600,payment:'cash',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'MAL024',notes:'',recordedBy:'Staff Member',recordedAt:'2025-05-03T06:50:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0025',date:'2025-05-03',destination:'RHAMU',sender:'Tom Kiplagat',senderPhone:'0716780025',receiver:'Zamzam Hussein',receiverPhone:'0727000025',address:'Rhamu, Main Market Street',description:'Kitchenware & Utensils',goodsValue:7000,cost:5300,payment:'partner',partner:'AMKA',term:'3days',customTerm:null,vehicle:null,status:'pending',trackCode:'ZHU025',notes:'',recordedBy:'Staff Member',recordedAt:'2025-05-03T10:00:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+  {id:'P0026',date:'2025-05-04',destination:'ELWAK',sender:'Janet Nyambura',senderPhone:'0717890026',receiver:'Bashir Aden',receiverPhone:'0728000026',address:'El Wak, Garissa Road junction',description:'Mattress & Beddings',goodsValue:14000,cost:4400,payment:'upfront',partner:null,term:null,customTerm:null,vehicle:null,status:'pending',trackCode:'BAD026',notes:'Bulky',recordedBy:'Staff Member',recordedAt:'2025-05-04T07:40:00Z',dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]},
+];
+
+const SC=[
+  {id:'C0001',date:'2025-04-20',category:'fuel',vehicle:'KBZ 123A',amount:6000,note:'Fuel — Nairobi depot fill-up',recordedBy:'Staff Member',recordedAt:'2025-04-20T07:00:00Z'},
+  {id:'C0002',date:'2025-04-21',category:'mileage',vehicle:'KDA 456B',amount:1500,note:'Mileage allowance — Trip 1',recordedBy:'Staff Member',recordedAt:'2025-04-21T07:00:00Z'},
+  {id:'C0003',date:'2025-04-21',category:'expense',vehicle:null,amount:1500,note:'Office supplies',recordedBy:'Staff Member',recordedAt:'2025-04-21T08:00:00Z'},
+  {id:'C0004',date:'2025-04-22',category:'lorry_balance',vehicle:null,amount:6000,note:'Lorry hire-purchase installment',recordedBy:'Admin User',recordedAt:'2025-04-22T09:00:00Z'},
+  {id:'C0005',date:'2025-04-23',category:'fuel',vehicle:'KCE 789C',amount:6000,note:'Fuel — Garissa refuel',recordedBy:'Staff Member',recordedAt:'2025-04-23T07:00:00Z'},
+  {id:'C0006',date:'2025-04-24',category:'expense',vehicle:null,amount:1500,note:'Staff airtime & comms',recordedBy:'Staff Member',recordedAt:'2025-04-24T08:00:00Z'},
+  {id:'C0007',date:'2025-04-26',category:'expense',vehicle:null,amount:1500,note:'Loading/offloading labour',recordedBy:'Staff Member',recordedAt:'2025-04-26T08:00:00Z'},
+  {id:'C0008',date:'2025-04-27',category:'fuel',vehicle:'KDA 456B',amount:6000,note:'Fuel — Wajir refuel',recordedBy:'Staff Member',recordedAt:'2025-04-27T07:00:00Z'},
+  {id:'C0009',date:'2025-04-28',category:'mileage',vehicle:null,amount:1500,note:'Mileage allowance — Trip 2',recordedBy:'Staff Member',recordedAt:'2025-04-28T07:00:00Z'},
+  {id:'C0010',date:'2025-04-29',category:'lorry_balance',vehicle:null,amount:6000,note:'Lorry hire-purchase installment',recordedBy:'Admin User',recordedAt:'2025-04-29T09:00:00Z'},
+  {id:'C0011',date:'2025-04-30',category:'expense',vehicle:null,amount:1500,note:'Miscellaneous office expenses',recordedBy:'Staff Member',recordedAt:'2025-04-30T08:00:00Z'},
+  {id:'C0012',date:'2025-05-01',category:'fuel',vehicle:null,amount:6000,note:'Fuel — return trip',recordedBy:'Staff Member',recordedAt:'2025-05-01T07:00:00Z'},
 ];
 
 function loadAll(){
   try{
     const u=localStorage.getItem(UK);users=u?JSON.parse(u):[...DU];
     const d=localStorage.getItem(DK);
-    if(d){const p=JSON.parse(d);S.parcels=p.parcels||[];S.vehicles=p.vehicles||S.vehicles;S.nextId=p.nextId||1;S.smsLog=p.smsLog||[];}
-    else{S.parcels=SP.map(p=>({...p}));S.nextId=21;saveD();}
+    if(d){const p=JSON.parse(d);S.parcels=p.parcels||[];S.vehicles=p.vehicles||S.vehicles;S.nextId=p.nextId||1;S.smsLog=p.smsLog||[];S.costs=p.costs||[];S.costNextId=p.costNextId||1;}
+    else{S.parcels=SP.map(p=>({...p}));S.nextId=27;S.costs=SC.map(c=>({...c}));S.costNextId=13;saveD();}
   }catch(e){users=[...DU];}
 }
 function saveU(){localStorage.setItem(UK,JSON.stringify(users));}
-function saveD(){localStorage.setItem(DK,JSON.stringify({parcels:S.parcels,vehicles:S.vehicles,nextId:S.nextId,smsLog:S.smsLog}));}
+function saveD(){localStorage.setItem(DK,JSON.stringify({parcels:S.parcels,vehicles:S.vehicles,nextId:S.nextId,smsLog:S.smsLog,costs:S.costs,costNextId:S.costNextId}));}
 function role(){return sess.user?.role;}
 function fmtKES(n){return'KES '+Number(n||0).toLocaleString();}
 function pid(){return'P'+String(S.nextId).padStart(4,'0');}
+function cid(){return'C'+String(S.costNextId).padStart(4,'0');}
 function genCode(r){return(r.replace(/\s+/g,'').substring(0,3).toUpperCase()+String(S.nextId).padStart(3,'0'));}
 function toast(m,d=2800){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
 function closeD(id){document.getElementById(id).classList.remove('open');}
@@ -547,16 +689,18 @@ function switchTab(tab){
 
 /* ══ INTAKE ══ */
 let curPay='cash';
+let lastAutoAddr='';
 function renderIntake(){
   const el=document.getElementById('tab-intake');
   el.innerHTML=rbanner()+`<div class="card">
-    <div class="ct">📋 New Parcel — Nairobi to Mandera</div>
+    <div class="ct" id="intake-title">📋 New Parcel — Nairobi to Mandera</div>
     <div class="fg"><div class="field"><label>Parcel ID</label><input id="fid" disabled></div><div class="field"><label>Date</label><input id="fdt" type="date"></div></div>
+    <div class="field"><label>Destination Town</label><select id="fdestn" onchange="updateIntakeDestInfo()">${destOptionsHTML('MANDERA')}</select><div class="fh" id="fdest-info"></div></div>
     <div class="field"><label>Sender Name</label><input id="fsn" placeholder="Full name" autocomplete="name"></div>
     <div class="field"><label>Sender Phone</label><input id="fsp" type="tel" placeholder="07XXXXXXXX" inputmode="tel"></div>
     <div class="field"><label>Receiver Name</label><input id="frn" placeholder="Full name"></div>
     <div class="field"><label>Receiver Phone</label><input id="frp" type="tel" placeholder="07XXXXXXXX" inputmode="tel"><div class="fh">📱 Tracking code SMS sent to this number immediately</div></div>
-    <div class="field"><label>Receiver Address (Mandera)</label><input id="faddr" placeholder="e.g. Mandera Town, near market"></div>
+    <div class="field"><label>Receiver Address</label><input id="faddr" placeholder="e.g. Town centre, near market"></div>
     <div class="field"><label>Description of Goods</label><input id="fdesc" placeholder="e.g. Electronics, Clothes, Food"></div>
     <div class="fg">
       <div class="field"><label>Value of Goods (KES)</label><input id="fgv" type="number" min="0" placeholder="0" inputmode="numeric"><div class="fh">Declared value</div></div>
@@ -578,8 +722,28 @@ function renderIntake(){
     <div id="sms-confirm" style="display:none;margin-top:12px"></div>
   </div>`;
   curPay='cash';
+  lastAutoAddr='';
   document.getElementById('fid').value=pid();
   document.getElementById('fdt').value=new Date().toISOString().slice(0,10);
+  updateIntakeDestInfo();
+}
+function updateIntakeDestInfo(){
+  const v=document.getElementById('fdestn')?.value||'MANDERA';
+  const el=document.getElementById('fdest-info');
+  if(el)el.textContent=destInfoLine(v);
+  const t=document.getElementById('intake-title');
+  if(t)t.textContent=`📋 New Parcel — Nairobi to ${DESTINATIONS[v]?.name||'Mandera'}`;
+  const addr=document.getElementById('faddr');
+  const destName=DESTINATIONS[v]?.name||'Mandera';
+  if(addr){
+    addr.placeholder=`e.g. ${destName} centre, near market`;
+    // Only auto-fill if the field is empty or still holds a value we set automatically —
+    // never overwrite an address the user has actually typed/customized themselves.
+    if(!addr.value.trim()||addr.value===lastAutoAddr){
+      addr.value=destName;
+      lastAutoAddr=destName;
+    }
+  }
 }
 function selPay(v){curPay=v;document.querySelectorAll('.po').forEach(e=>e.classList.toggle('sel',e.dataset.v===v));document.getElementById('ipf').style.display=v==='partner'?'block':'none';if(v!=='partner'){const c=document.getElementById('ictf');if(c)c.style.display='none';}}
 function iTogCT(){const v=document.getElementById('fterm')?.value,c=document.getElementById('ictf');if(c)c.style.display=v==='custom'?'block':'none';}
@@ -588,19 +752,89 @@ function addParcel(){
   const sn=gv('fsn'),rn=gv('frn'),cost=parseFloat(gv('fcost')||0),gval=parseFloat(gv('fgv')||0),rph=gv('frp');
   if(!sn||!rn||!cost){toast('⚠ Sender, Receiver and Delivery Cost required');return;}
   if(!rph){toast('⚠ Receiver phone required for SMS');return;}
+  const dest=document.getElementById('fdestn')?.value||'MANDERA';
+  const destName=DESTINATIONS[dest]?.name||'Mandera';
   const term=curPay==='partner'?gv('fterm'):'';
   const newId=pid();const trackCode=genCode(rn);
-  const parcel={id:newId,date:gv('fdt'),sender:sn,senderPhone:gv('fsp'),receiver:rn,receiverPhone:rph,address:gv('faddr'),description:gv('fdesc')||'General',goodsValue:gval,cost,payment:curPay,partner:curPay==='partner'?gv('fpart'):null,term:curPay==='partner'?term:null,customTerm:term==='custom'?gv('fct'):null,vehicle:null,status:'pending',trackCode,notes:gv('fnotes'),recordedBy:sess.user.name,recordedAt:new Date().toISOString(),dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]};
+  const parcel={id:newId,date:gv('fdt'),destination:dest,sender:sn,senderPhone:gv('fsp'),receiver:rn,receiverPhone:rph,address:gv('faddr'),description:gv('fdesc')||'General',goodsValue:gval,cost,payment:curPay,partner:curPay==='partner'?gv('fpart'):null,term:curPay==='partner'?term:null,customTerm:term==='custom'?gv('fct'):null,vehicle:null,status:'pending',trackCode,notes:gv('fnotes'),recordedBy:sess.user.name,recordedAt:new Date().toISOString(),dispatchedAt:null,intransitAt:null,deliveredAt:null,issuedTo:null,issuedId:null,editLog:[]};
   S.parcels.unshift(parcel);S.nextId++;
-  const smsMsg=`Dear ${rn}, your parcel from ${sn} is booked with NMD Deliveries. Tracking Code: ${trackCode}. Present this code at Mandera office to collect your parcel. Addr: ${gv('faddr')||'Mandera Office'}`;
+  const smsMsg=`Dear ${rn}, your parcel from ${sn} is booked with NMD Deliveries for ${destName}. Tracking Code: ${trackCode}. Present this code at ${destName} office to collect your parcel. Addr: ${gv('faddr')||destName+' Office'}`;
   sendSMS(rph,smsMsg,'intake:'+newId);saveD();
   const sc=document.getElementById('sms-confirm');
-  if(sc){sc.style.display='block';sc.innerHTML=`<div class="sms-sent">📱 SMS sent to ${rph} with code <strong>${trackCode}</strong></div><div class="sms-preview">"${smsMsg}"</div>`;}
-  toast('✓ Parcel '+newId+' recorded! SMS sent.');
+  if(sc){sc.style.display='block';sc.innerHTML=`<div class="sms-sent">📱 SMS sent to ${rph} with code <strong>${trackCode}</strong></div><div class="sms-preview">"${smsMsg}"</div><button class="btn btn-blue btn-sm btn-full" style="margin-top:10px" onclick="openReceipt('${newId}')">🧾 View / Print Receipt</button>`;}
+  toast('✓ Parcel '+newId+' recorded for '+destName+'! SMS sent.');
+  openReceipt(newId);
+}
+
+/* ══ RECEIPT ══ */
+let receiptWidth='80',curReceiptId=null;
+function receiptHTML(p,barcodeId){
+  const dn=routeName(p.destination);
+  const payLine=p.payment==='cash'?'PAY ON DELIVERY':p.payment==='upfront'?'PAID IN FULL':`Billed to ${p.partner||'Partner'} (${p.term==='custom'?(p.customTerm||'custom term'):({'3days':'3 Days','1week':'1 Week','2weeks':'2 Weeks','1month':'1 Month'}[p.term]||p.term||'')})`;
+  return`
+  <div class="rc"><h1>NMD DELIVERIES</h1><div class="rtag">Nairobi → ${dn} Courier Service</div><div class="rmeta">PARCEL RECEIPT</div></div>
+  <hr>
+  <div class="rrow"><span>Parcel ID</span><span class="rval">${p.id}</span></div>
+  <div class="rrow"><span>Date</span><span class="rval">${p.date}</span></div>
+  <div class="rrow"><span>Recorded by</span><span class="rval">${p.recordedBy||'-'}</span></div>
+  <div class="rcode-sub">Tracking Code — present to collect</div>
+  <div class="rcode">${p.trackCode||'—'}</div>
+  <div class="rbarcode" id="${barcodeId}-wrap"><svg id="${barcodeId}"></svg></div>
+  <hr>
+  <div class="rlabel">Sender</div>
+  <div class="rval">${p.sender}</div><div class="rsmall">${p.senderPhone||'—'}</div>
+  <div class="rlabel">Receiver</div>
+  <div class="rval">${p.receiver}</div><div class="rsmall">${p.receiverPhone||'—'}</div>
+  <div class="rsmall">${p.address||''}</div>
+  <div class="rlabel">Goods</div>
+  <div class="rval">${p.description}</div>
+  <div class="rrow rsmall"><span>Declared value</span><span>${fmtKES(p.goodsValue)}</span></div>
+  <hr>
+  <div class="rrow"><span>Delivery Cost</span><span class="rval">${fmtKES(p.cost)}</span></div>
+  <div class="rsmall rc" style="margin-top:3px;font-weight:700">${payLine}</div>
+  <hr>
+  <div class="rsmall rc">Collect at: <strong>${dn} Office</strong></div>
+  ${p.notes?`<div class="rsmall rc" style="margin-top:4px">Note: ${p.notes}</div>`:''}
+  <div class="rfoot">================================<br>Thank you for choosing<br><strong>NMD Deliveries</strong><br>================================</div>`;
+}
+function renderBarcode(id,value){
+  try{
+    if(typeof JsBarcode==='undefined')return;
+    const el=document.getElementById(id);
+    if(!el||!value)return;
+    JsBarcode(el,value,{format:'CODE128',width:1.6,height:38,fontSize:11,margin:2,font:'DM Mono'});
+  }catch(e){}
+}
+function openReceipt(id){
+  const p=S.parcels.find(x=>x.id===id);if(!p)return;
+  curReceiptId=id;
+  const el=document.getElementById('receipt-preview');
+  el.innerHTML=`<div class="receipt${receiptWidth==='58'?' w58':''}" id="receipt-preview-inner">${receiptHTML(p,'bc-preview')}</div>`;
+  document.getElementById('wt-80').classList.toggle('active',receiptWidth==='80');
+  document.getElementById('wt-58').classList.toggle('active',receiptWidth==='58');
+  renderBarcode('bc-preview',p.trackCode);
+  openD('drw-receipt');
+}
+function setReceiptWidth(w){
+  receiptWidth=w;
+  if(curReceiptId)openReceipt(curReceiptId);
+}
+function printReceipt(){
+  const p=S.parcels.find(x=>x.id===curReceiptId);if(!p)return;
+  const area=document.getElementById('receipt-area');
+  area.innerHTML=`<div class="receipt${receiptWidth==='58'?' w58':''}">${receiptHTML(p,'bc-print')}</div>`;
+  renderBarcode('bc-print',p.trackCode);
+  let pageStyle=document.getElementById('receipt-page-style');
+  if(!pageStyle){pageStyle=document.createElement('style');pageStyle.id='receipt-page-style';document.head.appendChild(pageStyle);}
+  pageStyle.textContent='@page{size:auto;margin:0}';
+  document.body.classList.add('printing-receipt');
+  const cleanup=()=>{document.body.classList.remove('printing-receipt');window.removeEventListener('afterprint',cleanup);};
+  window.addEventListener('afterprint',cleanup);
+  setTimeout(()=>{window.print();},50);
 }
 
 /* ══ ALL PARCELS ══ */
-let pFilter={status:'',payment:'',q:''};
+let pFilter={status:'',payment:'',dest:'',q:''};
 function renderParcels(){
   const el=document.getElementById('tab-parcels');
   const canEd=can('edit');
@@ -616,7 +850,7 @@ function renderParcels(){
   </div>
   <div id="search-result-area"></div>
   <div class="fbar">
-    <div class="fpill${!pFilter.status&&!pFilter.payment?' active':''}" onclick="setPF('','')">All</div>
+    <div class="fpill${!pFilter.status&&!pFilter.payment&&!pFilter.dest?' active':''}" onclick="setPF('','')">All</div>
     <div class="fpill${pFilter.status==='pending'?' active':''}" onclick="setPF('status','pending')">⏳ Pending</div>
     <div class="fpill${pFilter.status==='dispatched'?' active':''}" onclick="setPF('status','dispatched')">🚛 Dispatched</div>
     <div class="fpill${pFilter.status==='intransit'?' active':''}" onclick="setPF('status','intransit')">🔄 In Transit</div>
@@ -624,6 +858,9 @@ function renderParcels(){
     <div class="fpill${pFilter.payment==='cash'?' active':''}" onclick="setPF('payment','cash')">💵 Cash</div>
     <div class="fpill${pFilter.payment==='upfront'?' active':''}" onclick="setPF('payment','upfront')">💳 Upfront</div>
     <div class="fpill${pFilter.payment==='partner'?' active':''}" onclick="setPF('payment','partner')">🤝 Partner</div>
+  </div>
+  <div class="fbar">
+    ${DEST_ORDER.map(k=>`<div class="fpill${pFilter.dest===k?' active':''}" onclick="setPF('dest','${k}')">📍 ${DESTINATIONS[k].name}</div>`).join('')}
   </div>
   <div id="plist"></div>`;
   buildPList();
@@ -642,11 +879,12 @@ function showSearchResult(q){
   const p=S.parcels.find(x=>x.id.toLowerCase()===ql||x.trackCode?.toLowerCase()===ql||(x.id.toLowerCase().includes(ql))||(x.trackCode?.toLowerCase().includes(ql)));
   const el=document.getElementById('search-result-area');
   if(!p){el.innerHTML='';return;}
+  const dn=routeName(p.destination);
   const steps=[
     {s:'pending',label:'Parcel Recorded',time:p.recordedAt},
     {s:'dispatched',label:'Dispatched from Nairobi',time:p.dispatchedAt},
-    {s:'intransit',label:'In Transit',time:p.intransitAt},
-    {s:'delivered',label:'Issued at Mandera Office',time:p.deliveredAt},
+    {s:'intransit',label:'In Transit to '+dn,time:p.intransitAt},
+    {s:'delivered',label:'Issued at '+dn+' Office',time:p.deliveredAt},
   ];
   const order=['pending','dispatched','intransit','delivered'];
   const cur=order.indexOf(p.status);
@@ -657,7 +895,7 @@ function showSearchResult(q){
       <div>${sbadge(p.status)}</div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
-      ${badge(p.payment,p.partner)}<span style="font-size:12px;color:var(--teal);font-weight:700">🔑 ${p.trackCode}</span>
+      ${dbadge(p.destination)}${badge(p.payment,p.partner)}<span style="font-size:12px;color:var(--teal);font-weight:700">🔑 ${p.trackCode}</span>
     </div>
     <div class="track-timeline">
       ${steps.map((step,i)=>{
@@ -675,7 +913,7 @@ function showSearchResult(q){
   </div>`;
 }
 function setPF(key,val){
-  if(key===''){pFilter={status:'',payment:'',q:pFilter.q};}
+  if(key===''){pFilter={status:'',payment:'',dest:'',q:pFilter.q};}
   else if(pFilter[key]===val){pFilter[key]='';}
   else{pFilter[key]=val;}
   renderParcels();
@@ -686,8 +924,9 @@ function buildPList(){
   let p=S.parcels.filter(x=>{
     const ms=pFilter.status?x.status===pFilter.status:true;
     const mp=pFilter.payment?x.payment===pFilter.payment:true;
+    const md=pFilter.dest?x.destination===pFilter.dest:true;
     const mq=q?[x.id,x.trackCode,x.sender,x.receiver,x.description].some(f=>(f||'').toLowerCase().includes(q)):true;
-    return ms&&mp&&mq;
+    return ms&&mp&&md&&mq;
   });
   if(!p.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div>No parcels found.</div>';return;}
   el.innerHTML=p.map(x=>`<div class="pcard">
@@ -697,10 +936,13 @@ function buildPList(){
     </div>
     <div class="pcard-route">${x.sender} → ${x.receiver}</div>
     <div class="pcard-desc">${x.description}${x.receiverPhone?' · 📱 '+x.receiverPhone:''}</div>
-    <div class="pcard-meta">${badge(x.payment,x.partner)}${tlabel(x.term,x.customTerm)}${sbadge(x.status)}</div>
+    <div class="pcard-meta">${dbadge(x.destination)}${badge(x.payment,x.partner)}${tlabel(x.term,x.customTerm)}${sbadge(x.status)}</div>
     <div class="pcard-bottom">
       <span style="font-size:12px;color:var(--teal);font-weight:600">🔑 ${x.trackCode||'—'}</span>
-      ${canEd?`<button class="btn btn-w btn-sm" onclick="openEdit('${x.id}')">✏️ Edit</button>`:''}
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-blue btn-sm" onclick="openReceipt('${x.id}')">🧾</button>
+        ${canEd?`<button class="btn btn-w btn-sm" onclick="openEdit('${x.id}')">✏️ Edit</button>`:''}
+      </div>
     </div>
     ${x.vehicle?`<div style="font-size:12px;color:var(--t3);margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">🚛 ${x.vehicle}</div>`:''}
   </div>`).join('');
@@ -708,15 +950,21 @@ function buildPList(){
 
 /* ══ DISPATCH ══ */
 let selectedParcels=new Set();
+let dispFilter='';
 function renderDispatch(){
   selectedParcels=new Set();
   const el=document.getElementById('tab-dispatch');
-  const pending=S.parcels.filter(x=>x.status==='pending');
+  const allPending=S.parcels.filter(x=>x.status==='pending');
+  const pending=dispFilter?allPending.filter(x=>x.destination===dispFilter):allPending;
   el.innerHTML=rbanner()+`<div class="pg-title">🚛 Dispatch Parcels</div>
   <div class="card" style="background:var(--obg);border-color:#fed7aa">
-    <div style="font-size:13px;color:var(--orange);line-height:1.6"><strong>How to dispatch:</strong><br>1. Tap parcels to select them &nbsp;2. Choose the vehicle &nbsp;3. Tap Dispatch → status becomes Dispatched</div>
+    <div style="font-size:13px;color:var(--orange);line-height:1.6"><strong>How to dispatch:</strong><br>1. Filter by route &nbsp;2. Tap parcels to select them &nbsp;3. Choose the vehicle &nbsp;4. Tap Dispatch → status becomes Dispatched</div>
   </div>
-  ${pending.length===0?`<div class="empty"><div class="empty-icon">✅</div>No pending parcels to dispatch!</div>`:`
+  <div class="fbar">
+    <div class="fpill${!dispFilter?' active':''}" onclick="setDispFilter('')">All Routes (${allPending.length})</div>
+    ${DEST_ORDER.map(k=>{const n=allPending.filter(x=>x.destination===k).length;return`<div class="fpill${dispFilter===k?' active':''}" onclick="setDispFilter('${k}')">📍 ${DESTINATIONS[k].name} (${n})</div>`;}).join('')}
+  </div>
+  ${pending.length===0?`<div class="empty"><div class="empty-icon">✅</div>No pending parcels${dispFilter?' for '+routeName(dispFilter):''} to dispatch!</div>`:`
   <div id="dispatch-list">${pending.map(x=>`
   <div class="pcard" id="dpc-${x.id}" onclick="toggleSelect('${x.id}')">
     <div class="pcard-top">
@@ -728,15 +976,23 @@ function renderDispatch(){
     </div>
     <div class="pcard-route">${x.sender} → ${x.receiver}</div>
     <div class="pcard-desc">${x.description}</div>
-    <div class="pcard-meta">${badge(x.payment,x.partner)}${tlabel(x.term,x.customTerm)}</div>
-    <div style="font-size:12px;color:var(--teal);font-weight:600;margin-top:6px">🔑 ${x.trackCode||'—'} · 📍 ${x.address||'Mandera'}</div>
+    <div class="pcard-meta">${dbadge(x.destination)}${badge(x.payment,x.partner)}${tlabel(x.term,x.customTerm)}</div>
+    <div style="font-size:12px;color:var(--teal);font-weight:600;margin-top:6px">🔑 ${x.trackCode||'—'} · 📍 ${x.address||routeName(x.destination)}</div>
   </div>`).join('')}</div>
   <div class="dispatch-bar" id="dispatch-bar">
-    <span style="font-size:13px;font-weight:600;white-space:nowrap" id="dispatch-count">0 selected</span>
-    <select id="dispatch-vehicle"><option value="">— Select Vehicle —</option>${S.vehicles.map(v=>`<option value="${v.id}">${v.id} · ${v.driver}</option>`).join('')}</select>
+    <div class="dispatch-row">
+      <span style="font-size:13px;font-weight:600;white-space:nowrap" id="dispatch-count">0 selected</span>
+      <select id="dispatch-vehicle"><option value="">— Select Vehicle —</option>${S.vehicles.map(v=>`<option value="${v.id}">${v.id} · ${v.driver}</option>`).join('')}</select>
+    </div>
+    <div class="dispatch-tripcost-label">🧾 Trip Cost (optional — logged automatically on dispatch)</div>
+    <div class="dispatch-row">
+      <input type="number" id="trip-mileage" placeholder="Mileage (KES)" inputmode="numeric" min="0">
+      <input type="number" id="trip-fuel" placeholder="Fuel (KES)" inputmode="numeric" min="0">
+    </div>
     <button class="dispatch-btn" onclick="doDispatch()">🚛 Dispatch</button>
   </div>`}`;
 }
+function setDispFilter(k){dispFilter=k;renderDispatch();}
 function toggleSelect(id){
   if(selectedParcels.has(id))selectedParcels.delete(id);else selectedParcels.add(id);
   document.getElementById('dpc-'+id)?.classList.toggle('selected',selectedParcels.has(id));
@@ -752,14 +1008,24 @@ function doDispatch(){
   if(!veh){toast('⚠ Please select a vehicle');return;}
   if(selectedParcels.size===0){toast('⚠ No parcels selected');return;}
   let count=0;
-  selectedParcels.forEach(id=>{const p=S.parcels.find(x=>x.id===id);if(p&&p.status==='pending'){p.status='dispatched';p.vehicle=veh;p.dispatchedAt=new Date().toISOString();count++;}});
-  saveD();toast('✓ '+count+' parcel(s) dispatched on '+veh);selectedParcels=new Set();renderDispatch();
+  const destSet=new Set();
+  selectedParcels.forEach(id=>{const p=S.parcels.find(x=>x.id===id);if(p&&p.status==='pending'){p.status='dispatched';p.vehicle=veh;p.dispatchedAt=new Date().toISOString();count++;destSet.add(routeName(p.destination));}});
+  const today=new Date().toISOString().slice(0,10);
+  const routeNote=`Trip dispatch — ${veh} → ${[...destSet].join(', ')||'multiple routes'}`;
+  const mileageVal=parseFloat(document.getElementById('trip-mileage')?.value)||0;
+  const fuelVal=parseFloat(document.getElementById('trip-fuel')?.value)||0;
+  let costsLogged=0;
+  if(mileageVal>0){S.costs.push({id:cid(),date:today,category:'mileage',vehicle:veh,amount:mileageVal,note:routeNote,recordedBy:sess.user.name,recordedAt:new Date().toISOString()});S.costNextId++;costsLogged++;}
+  if(fuelVal>0){S.costs.push({id:cid(),date:today,category:'fuel',vehicle:veh,amount:fuelVal,note:routeNote,recordedBy:sess.user.name,recordedAt:new Date().toISOString()});S.costNextId++;costsLogged++;}
+  saveD();
+  toast('✓ '+count+' parcel(s) dispatched on '+veh+(costsLogged?' · '+costsLogged+' cost entr'+(costsLogged>1?'ies':'y')+' logged':''));
+  selectedParcels=new Set();renderDispatch();
 }
 
 /* ══ ISSUE PARCEL ══ */
 function renderIssue(){
   const el=document.getElementById('tab-issue');
-  el.innerHTML=rbanner()+`<div class="pg-title">✅ Issue Parcel — Mandera Office</div>
+  el.innerHTML=rbanner()+`<div class="pg-title">✅ Issue Parcel — Branch Office</div>
   <div class="receive-box">
     <div class="receive-icon">📬</div>
     <div style="font-size:17px;font-weight:700;margin-bottom:6px">Enter Tracking Code</div>
@@ -771,7 +1037,7 @@ function renderIssue(){
     <div class="ct">📋 Recently Issued Parcels</div>
     ${S.parcels.filter(x=>x.status==='delivered'&&x.deliveredAt).slice(0,8).map(x=>`
     <div class="vrow">
-      <div><div class="vrow-id">${x.trackCode} · ${x.id}</div><div class="vrow-name">${x.receiver}</div>
+      <div><div class="vrow-id">${x.trackCode} · ${x.id} · ${routeName(x.destination)}</div><div class="vrow-name">${x.receiver}</div>
       <div class="vrow-desc">${x.description} · Issued to: ${x.issuedTo||x.receiver} · ${x.deliveredAt?new Date(x.deliveredAt).toLocaleDateString('en-KE'):''}</div></div>
       <span class="badge b-delivered" style="flex-shrink:0;align-self:flex-start">✓ Issued</span>
     </div>`).join('')||'<div style="color:var(--t3);font-size:13px;padding:10px 0">No issuances yet</div>'}
@@ -789,6 +1055,7 @@ function lookupParcel(){
   el.innerHTML=`<div class="found-parcel">
     <div class="fp-title">✅ Parcel Found — Ready to Issue</div>
     <div class="fp-row"><span>Parcel ID</span><strong>${p.id}</strong></div>
+    <div class="fp-row"><span>Branch Office</span><strong>${dbadge(p.destination)}</strong></div>
     <div class="fp-row"><span>Receiver</span><strong>${p.receiver}</strong></div>
     <div class="fp-row"><span>Phone</span><strong>${p.receiverPhone}</strong></div>
     <div class="fp-row"><span>Description</span><strong>${p.description}</strong></div>
@@ -813,7 +1080,7 @@ function issueParcel(id){
   if(!name){toast('⚠ Please enter collector name');return;}
   if(!idNum){toast('⚠ Please enter collector ID number');return;}
   p.status='delivered';p.deliveredAt=new Date().toISOString();p.issuedTo=name;p.issuedId=idNum;
-  const msg=`Dear ${p.receiver}, your parcel (${p.trackCode}) from ${p.sender} has been issued at the Mandera office to ${name} (ID: ${idNum}). Thank you for using NMD Deliveries.`;
+  const msg=`Dear ${p.receiver}, your parcel (${p.trackCode}) from ${p.sender} has been issued at the ${routeName(p.destination)} office to ${name} (ID: ${idNum}). Thank you for using NMD Deliveries.`;
   sendSMS(p.receiverPhone,msg,'delivery:'+id);saveD();
   document.getElementById('recv-code').value='';
   document.getElementById('recv-result').innerHTML=`<div style="background:var(--gbg);border:1px solid #b7e4c7;border-radius:var(--r);padding:20px;text-align:center;margin-top:14px">
@@ -829,13 +1096,29 @@ function issueParcel(id){
 /* ══ EDIT DRAWER ══ */
 function etogglePart(){const v=document.getElementById('epay').value;document.getElementById('epf').style.display=v==='partner'?'block':'none';}
 function etogCT(){const v=document.getElementById('eterm')?.value,c=document.getElementById('ectf');if(c)c.style.display=v==='custom'?'block':'none';}
+let lastAutoEditAddr='';
+function updateEditDestInfo(){
+  const v=document.getElementById('edestn')?.value||'MANDERA';
+  const addr=document.getElementById('eaddr');
+  const destName=DESTINATIONS[v]?.name||'Mandera';
+  if(addr){
+    // Only auto-fill if blank or still holding a value we set automatically this session —
+    // never overwrite a real saved address just because the destination dropdown changed.
+    if(!addr.value.trim()||addr.value===lastAutoEditAddr){
+      addr.value=destName;
+      lastAutoEditAddr=destName;
+    }
+  }
+}
 function openEdit(id){
   const p=S.parcels.find(x=>x.id===id);if(!p)return;
   document.getElementById('epid').textContent='#'+p.id;
   document.getElementById('drw-edit').dataset.pid=id;
+  document.getElementById('edestn').innerHTML=destOptionsHTML(p.destination||'MANDERA');
   document.getElementById('es').value=p.sender||'';document.getElementById('esp').value=p.senderPhone||'';
   document.getElementById('er').value=p.receiver||'';document.getElementById('erp').value=p.receiverPhone||'';
   document.getElementById('eaddr').value=p.address||'';document.getElementById('edesc').value=p.description||'';
+  lastAutoEditAddr='';
   document.getElementById('ewt').value=p.goodsValue||'';document.getElementById('ecost').value=p.cost||'';
   document.getElementById('estat').value=p.status||'pending';document.getElementById('epay').value=p.payment||'cash';
   document.getElementById('epart').value=p.partner||'AMKA';
@@ -855,6 +1138,7 @@ function saveEdit(){
   const p=S.parcels.find(x=>x.id===id);if(!p)return;
   p.editLog=p.editLog||[];
   p.editLog.push({by:sess.user.name,at:new Date().toISOString(),reason});
+  p.destination=document.getElementById('edestn').value||p.destination||'MANDERA';
   p.sender=document.getElementById('es').value.trim();p.senderPhone=document.getElementById('esp').value.trim();
   p.receiver=document.getElementById('er').value.trim();p.receiverPhone=document.getElementById('erp').value.trim();
   p.address=document.getElementById('eaddr').value.trim();p.description=document.getElementById('edesc').value.trim();
@@ -914,12 +1198,128 @@ function filterByDate(parcels){
     return true;
   });
 }
+function costCatLabel(c){return({mileage:'🛣️ Mileage',fuel:'⛽ Fuel',lorry_balance:'🚛 Balance of the Lorry',expense:'🧾 Expense'}[c]||c);}
+function openCostDrawer(prefillVeh,prefillCat,prefillDate){
+  document.getElementById('ccdate').value=prefillDate||new Date().toISOString().slice(0,10);
+  document.getElementById('cccat').value=prefillCat||'fuel';
+  document.getElementById('ccveh').innerHTML='<option value="">— General / Not vehicle-specific —</option>'+S.vehicles.map(v=>`<option value="${v.id}" ${prefillVeh===v.id?'selected':''}>${v.id} — ${v.driver}</option>`).join('');
+  document.getElementById('ccamt').value='';
+  document.getElementById('ccnote').value='';
+  clearPendingReceipt();
+  openD('drw-cost');
+}
+function addCostEntry(){
+  const date=document.getElementById('ccdate').value;
+  const category=document.getElementById('cccat').value;
+  const vehicle=document.getElementById('ccveh').value||null;
+  const amount=parseFloat(document.getElementById('ccamt').value)||0;
+  const note=document.getElementById('ccnote').value.trim();
+  if(!date){toast('⚠ Date is required');return;}
+  if(!amount||amount<=0){toast('⚠ Enter a valid amount');return;}
+  const entry={id:cid(),date,category,vehicle,amount,note,receiptName:pendingReceipt?.name||null,receiptType:pendingReceipt?.type||null,receiptData:pendingReceipt?.dataUrl||null,recordedBy:sess.user.name,recordedAt:new Date().toISOString()};
+  S.costs.push(entry);S.costNextId++;
+  saveD();closeD('drw-cost');clearPendingReceipt();toast('✓ Cost entry '+entry.id+' logged'+(entry.receiptData?' with receipt':''));
+  if(curTab==='reports')buildReports();
+  if(curTab==='vehicles')renderVehicles();
+}
+function delCostEntry(id){
+  if(!confirm('Delete this cost entry?'))return;
+  S.costs=S.costs.filter(c=>c.id!==id);
+  saveD();toast('Cost entry removed');
+  if(curTab==='reports')buildReports();
+  if(curTab==='vehicles')renderVehicles();
+}
+
+/* ══ COST RECEIPT ATTACHMENTS ══ */
+let pendingReceipt=null;
+const RECEIPT_MAX_PDF_BYTES=4*1024*1024;
+const RECEIPT_MAX_DIM=1280;
+function clearPendingReceipt(){
+  pendingReceipt=null;
+  const fi=document.getElementById('ccfile');if(fi)fi.value='';
+  const pv=document.getElementById('cc-file-preview');if(pv)pv.innerHTML='';
+}
+function compressReceiptImage(file,cb){
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>RECEIPT_MAX_DIM||h>RECEIPT_MAX_DIM){
+        if(w>=h){h=Math.round(h*RECEIPT_MAX_DIM/w);w=RECEIPT_MAX_DIM;}
+        else{w=Math.round(w*RECEIPT_MAX_DIM/h);h=RECEIPT_MAX_DIM;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      try{cb(canvas.toDataURL('image/jpeg',0.72));}catch(e){cb(ev.target.result);}
+    };
+    img.onerror=()=>cb(ev.target.result);
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function receiptPreviewHTML(r){
+  if(r.type&&r.type.startsWith('image/')){
+    return`<div class="receipt-preview-row"><img src="${r.dataUrl}" class="receipt-thumb"><div class="receipt-pv-info"><div class="receipt-pv-name">${r.name}</div><button class="btn btn-d btn-sm" onclick="clearPendingReceipt()">✕ Remove</button></div></div>`;
+  }
+  return`<div class="receipt-preview-row"><div class="receipt-thumb receipt-thumb-pdf">📄</div><div class="receipt-pv-info"><div class="receipt-pv-name">${r.name}</div><button class="btn btn-d btn-sm" onclick="clearPendingReceipt()">✕ Remove</button></div></div>`;
+}
+function handleCostFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const isImage=file.type.startsWith('image/'),isPdf=file.type==='application/pdf';
+  if(!isImage&&!isPdf){toast('⚠ Please attach an image or PDF');e.target.value='';return;}
+  if(isPdf&&file.size>RECEIPT_MAX_PDF_BYTES){toast('⚠ PDF too large — max 4MB');e.target.value='';return;}
+  if(isImage){
+    compressReceiptImage(file,(dataUrl)=>{
+      pendingReceipt={name:file.name,type:'image/jpeg',dataUrl};
+      const pv=document.getElementById('cc-file-preview');if(pv)pv.innerHTML=receiptPreviewHTML(pendingReceipt);
+    });
+  }else{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      pendingReceipt={name:file.name,type:file.type,dataUrl:reader.result};
+      const pv=document.getElementById('cc-file-preview');if(pv)pv.innerHTML=receiptPreviewHTML(pendingReceipt);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+function viewReceipt(costId){
+  const c=S.costs.find(x=>x.id===costId);if(!c||!c.receiptData)return;
+  const body=document.getElementById('receipt-view-body');
+  if(c.receiptType&&c.receiptType.startsWith('image/')){
+    body.innerHTML=`<img src="${c.receiptData}" class="receipt-view-img">`;
+  }else{
+    body.innerHTML=`<div style="text-align:center;padding:30px 10px"><div style="font-size:40px">📄</div><div style="margin:10px 0;font-weight:600">${c.receiptName||'Receipt.pdf'}</div><a href="${c.receiptData}" download="${c.receiptName||'receipt.pdf'}" class="btn btn-p" style="display:inline-flex">⬇️ Open / Download PDF</a></div>`;
+  }
+  openD('drw-receipt-view');
+}
+let attachTargetCostId=null;
+function openAttachReceipt(costId){attachTargetCostId=costId;document.getElementById('attach-receipt-input').click();}
+function handleAttachReceiptFile(e){
+  const file=e.target.files[0];if(!file||!attachTargetCostId){e.target.value='';return;}
+  const isImage=file.type.startsWith('image/'),isPdf=file.type==='application/pdf';
+  if(!isImage&&!isPdf){toast('⚠ Please attach an image or PDF');e.target.value='';return;}
+  if(isPdf&&file.size>RECEIPT_MAX_PDF_BYTES){toast('⚠ PDF too large — max 4MB');e.target.value='';return;}
+  const c=S.costs.find(x=>x.id===attachTargetCostId);
+  if(!c){e.target.value='';attachTargetCostId=null;return;}
+  const finish=(name,type,dataUrl)=>{
+    c.receiptName=name;c.receiptType=type;c.receiptData=dataUrl;
+    saveD();toast('✓ Receipt attached to '+c.id);
+    e.target.value='';attachTargetCostId=null;
+    if(curTab==='reports')buildReports();
+    if(curTab==='vehicles')renderVehicles();
+  };
+  if(isImage)compressReceiptImage(file,(dataUrl)=>finish(file.name,'image/jpeg',dataUrl));
+  else{const reader=new FileReader();reader.onload=()=>finish(file.name,file.type,reader.result);reader.readAsDataURL(file);}
+}
 function buildReports(){
   const allP=filterByDate(S.parcels);
   const cash=allP.filter(x=>x.payment==='cash'),up=allP.filter(x=>x.payment==='upfront');
   const amka=allP.filter(x=>x.partner==='AMKA'),kidba=allP.filter(x=>x.partner==='KIDBA'),matta=allP.filter(x=>x.partner==='MATTA');
   const sumC=a=>a.reduce((s,b)=>s+b.cost,0);
   const tot=sumC(allP),cr=sumC(cash),ur=sumC(up),ar=sumC(amka),kr=sumC(kidba),mr=sumC(matta),pr=ar+kr+mr;
+  const destGroups=DEST_ORDER.map(k=>({code:k,...DESTINATIONS[k],items:allP.filter(x=>x.destination===k)}));
   function pct(a,b){return b?Math.round(a/b*100):0;}
   const pending=allP.filter(x=>x.status==='pending').length,dispatched=allP.filter(x=>x.status==='dispatched').length,intransit=allP.filter(x=>x.status==='intransit').length,delivered=allP.filter(x=>x.status==='delivered').length;
   function miniCards(rows){
@@ -948,6 +1348,16 @@ function buildReports(){
     {label:'In Transit',val:intransit,color:'#312e81',bg:'#e0e7ff',items:allP.filter(x=>x.status==='intransit')},
     {label:'Delivered',val:delivered,color:'#2d6a4f',bg:'#d8f3dc',items:allP.filter(x=>x.status==='delivered')},
   ].filter(x=>x.val>0);
+  const destPie=destGroups.map(g=>({label:g.name,val:sumC(g.items),color:g.color,bg:g.bg,items:g.items})).filter(x=>x.val>0);
+
+  // Profit & Loss — cost entries filtered to the same selected date range as parcels
+  const allC=filterByDate(S.costs);
+  const sumCost=cat=>allC.filter(c=>c.category===cat).reduce((s,c)=>s+c.amount,0);
+  const mileageCost=sumCost('mileage'),fuelCost=sumCost('fuel'),lorryBalCost=sumCost('lorry_balance'),expenseCost=sumCost('expense');
+  const lorryRentTotal=mileageCost+fuelCost+lorryBalCost;
+  const totalCosts=lorryRentTotal+expenseCost;
+  const profit=tot-totalCosts;
+  const periodLabel=rPeriod==='all'?'All Time':(rDateFrom&&rDateTo?(rDateFrom===rDateTo?rDateFrom:rDateFrom+' → '+rDateTo):'Selected Period');
 
   rc.innerHTML=`
   <div style="display:flex;gap:8px;margin-bottom:14px">
@@ -966,6 +1376,47 @@ function buildReports(){
   </div>
 
   <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+      <div class="ct" style="margin:0;padding:0;border:none">💰 Profit & Loss</div>
+      <div style="display:flex;gap:6px">
+        ${allC.length?`<button class="btn btn-s btn-sm" onclick="exportCostsCSV()">⬇️</button>`:''}
+        ${can('costadd')?`<button class="btn btn-s btn-sm" onclick="openCostDrawer()">+ Add Cost</button>`:''}
+      </div>
+    </div>
+    <div class="fh" style="margin-bottom:10px">${periodLabel}</div>
+
+    <div class="plrow bold"><span>Receipt Numbers</span><span>${allP.length}</span></div>
+
+    <div class="plsection">Revenue</div>
+    <div class="plrow"><span>💵 Cash on Delivery</span><span>${fmtKES(cr)}</span></div>
+    <div class="plrow"><span>💳 Upfront</span><span>${fmtKES(ur)}</span></div>
+    <div class="plrow"><span>AMKA</span><span>${fmtKES(ar)}</span></div>
+    <div class="plrow"><span>KIDBA</span><span>${fmtKES(kr)}</span></div>
+    <div class="plrow"><span>MATTA</span><span>${fmtKES(mr)}</span></div>
+    <div class="plrow bold" style="color:var(--green)"><span>Total Amount</span><span>${fmtKES(tot)}</span></div>
+
+    <div class="plsection">Lorry Rent</div>
+    <div class="plrow"><span>🛣️ Mileage</span><span>${fmtKES(mileageCost)}</span></div>
+    <div class="plrow"><span>⛽ Fuel</span><span>${fmtKES(fuelCost)}</span></div>
+    <div class="plrow"><span>🚛 Balance of the Lorry</span><span>${fmtKES(lorryBalCost)}</span></div>
+    <div class="plrow bold"><span>Subtotal</span><span>${fmtKES(lorryRentTotal)}</span></div>
+
+    <div class="plsection">Expenses</div>
+    <div class="plrow bold"><span>🧾 Expenses</span><span>${fmtKES(expenseCost)}</span></div>
+
+    <div class="profit-box ${profit>=0?'pos':'neg'}">
+      <div class="pl">${profit>=0?'✓ Profit':'⚠ Loss'}</div>
+      <div class="pv">${fmtKES(Math.abs(profit))}</div>
+      <div class="pf">Total Amount − Lorry Rent − Expenses<br>${fmtKES(tot)} − ${fmtKES(lorryRentTotal)} − ${fmtKES(expenseCost)} = ${fmtKES(profit)}</div>
+    </div>
+
+    ${allC.length?`<div class="plsection">Cost Entries This Period (${allC.length})</div>${allC.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(c=>`<div class="vrow">
+      <div><div class="vrow-id">${c.id} · ${c.date}${c.vehicle?' · 🚛 '+c.vehicle:''}</div><div class="vrow-name">${costCatLabel(c.category)}</div><div class="vrow-desc">${c.note||''}${c.recordedBy?' · '+c.recordedBy:''}</div></div>
+      <div class="vrow-right"><div class="vrow-cost">${fmtKES(c.amount)}</div><div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;justify-content:flex-end">${c.receiptData?`<button class="btn btn-blue btn-sm" style="padding:4px 10px;font-size:11px" onclick="viewReceipt('${c.id}')">📎 Receipt</button>`:(can('costadd')?`<button class="btn btn-s btn-sm" style="padding:4px 10px;font-size:11px" onclick="openAttachReceipt('${c.id}')">📎 Attach</button>`:'')}${can('edit')?`<button class="btn btn-d btn-sm" style="padding:4px 10px;font-size:11px" onclick="delCostEntry('${c.id}')">Delete</button>`:''}</div></div>
+    </div>`).join('')}`:'<div class="fh" style="margin-top:10px;text-align:center">No cost entries logged for this period yet.</div>'}
+  </div>
+
+  <div class="card">
     <div class="ct">📊 Revenue by Payment Method</div>
     ${allP.length?`<div class="pie-wrap"><canvas class="pie-canvas" id="pie-pay" width="200" height="200"></canvas><div class="pie-legend" id="pie-pay-legend"></div></div><div class="pie-detail-panel" id="pie-pay-detail"></div>`:'<div class="empty" style="padding:20px">No data</div>'}
   </div>
@@ -973,6 +1424,11 @@ function buildReports(){
   <div class="card">
     <div class="ct">📊 Parcels by Status</div>
     ${allP.length?`<div class="pie-wrap"><canvas class="pie-canvas" id="pie-status" width="200" height="200"></canvas><div class="pie-legend" id="pie-status-legend"></div></div><div class="pie-detail-panel" id="pie-status-detail"></div>`:'<div class="empty" style="padding:20px">No data</div>'}
+  </div>
+
+  <div class="card">
+    <div class="ct">🗺️ Revenue by Destination</div>
+    ${allP.length?`<div class="pie-wrap"><canvas class="pie-canvas" id="pie-dest" width="200" height="200"></canvas><div class="pie-legend" id="pie-dest-legend"></div></div><div class="pie-detail-panel" id="pie-dest-detail"></div>`:'<div class="empty" style="padding:20px">No data</div>'}
   </div>
 
   <div class="card"><div class="ct">💵 Cash on Delivery</div>
@@ -987,6 +1443,13 @@ function buildReports(){
       <div class="metric"><div class="ml">MATTA</div><div class="mv" style="font-size:13px;color:var(--coral)">${fmtKES(mr)}</div><div class="ms">${matta.length} parcels</div></div>
     </div>
     ${['AMKA','KIDBA','MATTA'].map(n=>{const rows=allP.filter(x=>x.partner===n);return`<div style="margin-top:12px"><div class="ct">${n} — ${rows.length} Parcels · ${fmtKES(sumC(rows))}</div>${miniCards(rows)}</div>`;}).join('')}
+  </div>
+
+  <div class="card"><div class="ct">🗺️ Breakdown by Route</div>
+    <div class="metrics" style="grid-template-columns:repeat(2,1fr)">
+      ${destGroups.map(g=>`<div class="metric" style="background:${g.bg};border-color:${g.color}33"><div class="ml">${g.name} · ${g.distanceKm.toLocaleString()}km</div><div class="mv" style="font-size:15px;color:${g.color}">${fmtKES(sumC(g.items))}</div><div class="ms">${g.items.length} parcels</div></div>`).join('')}
+    </div>
+    ${destGroups.map(g=>`<div style="margin-top:12px"><div class="ct">📍 ${g.name} Branch — ${g.items.length} Parcels · ${fmtKES(sumC(g.items))} <span style="font-weight:400;text-transform:none;letter-spacing:0">· ${g.route}</span></div>${miniCards(g.items)}</div>`).join('')}
   </div>`;
 
   // Draw pies after DOM update
@@ -994,6 +1457,7 @@ function buildReports(){
     if(allP.length){
       drawPie('pie-pay','pie-pay-legend','pie-pay-detail',payPie,tot,'Revenue');
       drawPie('pie-status','pie-status-legend','pie-status-detail',statusPie,allP.length,'Parcels');
+      drawPie('pie-dest','pie-dest-legend','pie-dest-detail',destPie,tot,'Revenue');
     }
   },50);
 }
@@ -1081,6 +1545,7 @@ function renderVehicles(){
   ${S.vehicles.map(v=>{
     const vp=p.filter(x=>x.vehicle===v.id),rev=vp.reduce((a,b)=>a+b.cost,0);
     const del=vp.filter(x=>x.status==='delivered').length,disp=vp.filter(x=>x.status==='dispatched').length,tr=vp.filter(x=>x.status==='intransit').length;
+    const vc=S.costs.filter(c=>c.vehicle===v.id),costTotal=vc.reduce((a,b)=>a+b.amount,0),net=rev-costTotal;
     return`<div class="vcard"><div class="vcard-hdr">
       <div><div class="vplate">${v.id}</div><div style="font-size:12px;color:var(--t3);margin-top:4px">${v.type} · ${v.driver}</div></div>
       <div style="text-align:right"><div class="vrev-amt">${fmtKES(rev)}</div><div class="vrev-sub">${vp.length} parcels</div></div>
@@ -1091,9 +1556,19 @@ function renderVehicles(){
       <div class="metric indigo"><div class="ml">Transit</div><div class="mv" style="font-size:18px">${tr}</div></div>
       <div class="metric green"><div class="ml">Done</div><div class="mv" style="font-size:18px">${del}</div></div>
     </div>
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px">
+      <div class="metric green"><div class="ml">Revenue</div><div class="mv" style="font-size:14px">${fmtKES(rev)}</div></div>
+      <div class="metric orange"><div class="ml">Costs Logged</div><div class="mv" style="font-size:14px">${fmtKES(costTotal)}</div></div>
+      <div class="metric ${net>=0?'blue':''}" style="${net<0?'background:var(--rbg);border-color:#fca5a5':''}"><div class="ml">Net</div><div class="mv" style="font-size:14px;${net<0?'color:var(--red)':''}">${fmtKES(net)}</div></div>
+    </div>
+    ${can('costadd')?`<button class="btn btn-s btn-sm btn-full" style="margin-bottom:12px" onclick="openCostDrawer('${v.id}')">💰 Log Cost for ${v.id}</button>`:''}
+    ${vc.length?`<div class="fh" style="margin-bottom:6px">Recent cost entries for this vehicle</div>${vc.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(c=>`<div class="vrow">
+      <div><div class="vrow-id">${c.id} · ${c.date}</div><div class="vrow-name">${costCatLabel(c.category)}</div><div class="vrow-desc">${c.note||''}</div></div>
+      <div class="vrow-right"><div class="vrow-cost">${fmtKES(c.amount)}</div><div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;justify-content:flex-end">${c.receiptData?`<button class="btn btn-blue btn-sm" style="padding:4px 10px;font-size:11px" onclick="viewReceipt('${c.id}')">📎 Receipt</button>`:(can('costadd')?`<button class="btn btn-s btn-sm" style="padding:4px 10px;font-size:11px" onclick="openAttachReceipt('${c.id}')">📎 Attach</button>`:'')}${can('edit')?`<button class="btn btn-d btn-sm" style="padding:4px 10px;font-size:11px" onclick="delCostEntry('${c.id}')">Delete</button>`:''}</div></div>
+    </div>`).join('')}${vc.length>5?`<div class="fh" style="text-align:center;margin-top:4px">+${vc.length-5} more — see Reports for full history</div>`:''}`:''}
     ${vp.length?vp.map(x=>`<div class="vrow">
       <div><div class="vrow-id">${x.id} · ${x.date}</div><div class="vrow-name">${x.sender} → ${x.receiver}</div><div class="vrow-desc">${x.description}</div></div>
-      <div class="vrow-right"><div class="vrow-cost">${fmtKES(x.cost)}</div><div class="vrow-badges">${badge(x.payment,x.partner)}${sbadge(x.status)}</div></div>
+      <div class="vrow-right"><div class="vrow-cost">${fmtKES(x.cost)}</div><div class="vrow-badges">${dbadge(x.destination)}${badge(x.payment,x.partner)}${sbadge(x.status)}</div></div>
     </div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-weight:700;font-size:13px;border-top:2px solid var(--border);margin-top:4px"><span>TOTAL</span><span>${fmtKES(rev)}</span></div>`
     :'<div class="empty" style="padding:20px">No parcels assigned yet</div>'}
     </div>`;
@@ -1114,6 +1589,13 @@ function renderAdmin(){
   <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="ct" style="margin:0;padding:0;border:none">🛡️ System Users</div><button class="btn btn-p btn-sm" onclick="openD('drw-user')">+ Add User</button></div>
     ${users.map(u=>`<div class="urow"><div><div class="urow-name">${u.name}</div><div class="urow-un">${u.username} · <span class="rchip ${RC[u.role]}">${RI[u.role]} ${RL[u.role]}</span></div></div>${u.username!=='admin'?`<button class="btn btn-d btn-sm" onclick="delUser('${u.id}')">Remove</button>`:'<span style="font-size:11px;color:var(--t3)">🔒</span>'}</div>`).join('')}
   </div>
+  <div class="card"><div class="ct">🗺️ Delivery Routes</div>
+    ${DEST_ORDER.map(k=>{const d=DESTINATIONS[k];return`<div class="vrow">
+      <div><div class="vrow-name">📍 ${d.name}</div><div class="vrow-desc">${d.route}</div><div class="vrow-desc" style="margin-top:2px">${d.office||d.name+' Branch Office'}</div></div>
+      <div class="vrow-right"><div class="vrow-cost" style="font-size:13px;color:${d.color}">${d.distanceKm.toLocaleString()} km</div><div style="font-size:11px;color:var(--t3)">~${d.etaHrs} hrs drive</div></div>
+    </div>`;}).join('')}
+    <div style="font-size:11px;color:var(--t3);margin-top:10px;line-height:1.5">Coordinates & road sequence sourced from Google Maps (A13 / Isiolo–Mandera Road via Garissa–Wajir). Distances are road-route estimates and may vary with conditions.</div>
+  </div>
   <div class="card"><div class="ct">⚙️ Role Permissions</div>
     <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr><th style="text-align:left;padding:8px;background:var(--s2);border-bottom:1px solid var(--border)">Module</th><th style="padding:8px;background:var(--s2);border-bottom:1px solid var(--border);text-align:center">👷</th><th style="padding:8px;background:var(--s2);border-bottom:1px solid var(--border);text-align:center">🗂</th><th style="padding:8px;background:var(--s2);border-bottom:1px solid var(--border);text-align:center">🛡</th></tr></thead>
@@ -1122,9 +1604,11 @@ function renderAdmin(){
         <tr><td style="padding:8px;border-bottom:1px solid var(--border)">All Parcels</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">View</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">View+Edit</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">Full</td></tr>
         <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Dispatch</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
         <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Issue Parcel</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Reports</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">—</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Log Costs (Dispatch/Vehicles)</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid var(--border)">Reports / P&L / Delete Costs</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">—</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td><td style="text-align:center;padding:8px;border-bottom:1px solid var(--border)">✅</td></tr>
         <tr><td style="padding:8px">Admin</td><td style="text-align:center;padding:8px">—</td><td style="text-align:center;padding:8px">—</td><td style="text-align:center;padding:8px">✅</td></tr>
       </tbody></table></div>
+    <div style="font-size:11px;color:var(--t3);margin-top:10px;line-height:1.5">Staff and Supervisors can log costs as they happen (at Dispatch or from the Vehicles tab); only Supervisor/Admin can view the full Profit &amp; Loss report or delete a cost entry.</div>
   </div>
   <div class="card"><div class="ct">🗂️ Edit Audit Log</div>
     ${S.parcels.filter(x=>x.editLog?.length).length===0?'<div style="color:var(--t3);font-size:13px;padding:8px 0">No edits recorded yet</div>':
@@ -1150,9 +1634,15 @@ function delUser(id){if(!confirm('Remove this user?'))return;users=users.filter(
 
 function exportCSV(){
   if(!S.parcels.length){toast('No parcels to export');return;}
-  const h=['ID','Date','Sender','Sender Phone','Receiver','Receiver Phone','Address','Description','Goods Value(KES)','Delivery Cost(KES)','Payment','Partner','Term','Custom Term','Vehicle','Status','Track Code','Issued To','Issued ID','Recorded By','Notes'];
-  const rows=S.parcels.map(p=>[p.id,p.date,p.sender,p.senderPhone||'',p.receiver,p.receiverPhone||'',p.address||'',p.description,p.goodsValue||0,p.cost,p.payment,p.partner||'',p.term||'',p.customTerm||'',p.vehicle||'',p.status,p.trackCode||'',p.issuedTo||'',p.issuedId||'',p.recordedBy||'',p.notes||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const h=['ID','Date','Destination','Sender','Sender Phone','Receiver','Receiver Phone','Address','Description','Goods Value(KES)','Delivery Cost(KES)','Payment','Partner','Term','Custom Term','Vehicle','Status','Track Code','Issued To','Issued ID','Recorded By','Notes'];
+  const rows=S.parcels.map(p=>[p.id,p.date,routeName(p.destination),p.sender,p.senderPhone||'',p.receiver,p.receiverPhone||'',p.address||'',p.description,p.goodsValue||0,p.cost,p.payment,p.partner||'',p.term||'',p.customTerm||'',p.vehicle||'',p.status,p.trackCode||'',p.issuedTo||'',p.issuedId||'',p.recordedBy||'',p.notes||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent([h.join(','),...rows].join('\n'));a.download='nmd_parcels_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('✓ CSV exported');
+}
+function exportCostsCSV(){
+  if(!S.costs.length){toast('No cost entries to export');return;}
+  const h=['ID','Date','Category','Vehicle','Amount(KES)','Note','Receipt','Recorded By'];
+  const rows=S.costs.map(c=>[c.id,c.date,costCatLabel(c.category).replace(/^\S+\s/,''),c.vehicle||'',c.amount,c.note||'',c.receiptData?(c.receiptName||'Attached'):'No',c.recordedBy||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent([h.join(','),...rows].join('\n'));a.download='nmd_costs_'+new Date().toISOString().slice(0,10)+'.csv';a.click();toast('✓ Costs CSV exported');
 }
 function clearAll(){if(!confirm('Delete ALL parcel records? Cannot be undone.'))return;S.parcels=[];S.nextId=1;S.smsLog=[];saveD();renderAdmin();toast('Data cleared');}
 
@@ -1166,6 +1656,11 @@ window.lookupParcel=lookupParcel;window.issueParcel=issueParcel;
 window.setPeriod=setPeriod;window.applyDateRange=applyDateRange;window.pieClick=pieClick;
 window.addVehicle=addVehicle;window.addUser=addUser;window.delUser=delUser;
 window.exportCSV=exportCSV;window.clearAll=clearAll;
+window.updateIntakeDestInfo=updateIntakeDestInfo;window.setDispFilter=setDispFilter;window.updateEditDestInfo=updateEditDestInfo;
+window.openReceipt=openReceipt;window.setReceiptWidth=setReceiptWidth;window.printReceipt=printReceipt;
+window.openCostDrawer=openCostDrawer;window.addCostEntry=addCostEntry;window.delCostEntry=delCostEntry;window.exportCostsCSV=exportCostsCSV;
+window.handleCostFile=handleCostFile;window.clearPendingReceipt=clearPendingReceipt;window.viewReceipt=viewReceipt;
+window.openAttachReceipt=openAttachReceipt;window.handleAttachReceiptFile=handleAttachReceiptFile;
 
 loadAll();
 </script>

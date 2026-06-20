@@ -1,0 +1,9 @@
+# OS
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# VS Code workspace files
+.vscode/
